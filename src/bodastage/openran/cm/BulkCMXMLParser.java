@@ -252,6 +252,7 @@ public class BulkCMXMLParser {
                     case XMLStreamConstants.START_ELEMENT:
                         startElementEvent(event);
                         break;
+                    case XMLStreamConstants.SPACE:
                     case XMLStreamConstants.CHARACTERS:
                         characterEvent(event);
                         break;
@@ -445,16 +446,19 @@ public class BulkCMXMLParser {
 
         //E3:4
         if (vsDataType != null && attrMarker == true) {//We are processing vsData<DataType> attributes
-            //E2:3:1 @TODO: later
-            //E2:3:2 @TODO: later
-
-            if (parentChildParameters.containsKey(qName)) {
-                return;
-            }
-
             String newTag = qName;
             String newValue = tagData;
 
+            //@TODO:Handle attributes with children
+            if (parentChildParameters.containsKey(qName)) {
+                return;
+            }
+                       
+            //Handle multivalued paramenters
+            if(vsDataTypeStack.containsKey(newTag)){
+                newValue = vsDataTypeStack.get(newTag) + multiValueSeparetor + tagData;
+            }
+                        
             //@TODO: Handle cases of multi values parameters and parameters with children
             //For now continue as if they do not exist
             vsDataTypeStack.put(newTag, newValue);

@@ -6,5 +6,6 @@ The parser will convert from XML to csv any XML file that is complaint with TS 1
 #Usage
 java -jar  bulkcmparser.jar bulkcm.xml outputDirectory
 
-
+#Download
+The lastest compiled jar file is availabled in the dist directory or get it [here](https://github.com/boda-stage/boda-bulkcmparser/blob/master/dist/boda-bulkcmparser.jar).
 
