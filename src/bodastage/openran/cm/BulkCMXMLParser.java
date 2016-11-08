@@ -142,7 +142,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String outDirectory = "/tmp";
+    static String outputDirectory = "/tmp";
 
     /**
      * Limit the number of iterations for testing.
@@ -208,22 +208,37 @@ public class BulkCMXMLParser {
     static String bulkCMXMLFile;
     
     static String bulkCMXMLFileBasename;
+    
     /**
      * @param args the command line arguments
      *
      * @since 1.0.0
      * @version 1.0.0
-     */
+     */    
     public static void main(String[] args) throws UnsupportedEncodingException {
 
         try {
             
-            if(args.length != 1 ){
+            if(args.length != 2 ){
                 showHelp();
                 System.exit(1);
             }
             //Get bulk CM XML file to parse.
             bulkCMXMLFile = args[0];
+            outputDirectory = args[1];
+            
+            //Confirm that the output directory is a directory and has write 
+            //privileges
+            File fOutputDir = new File(outputDirectory);
+            if(!fOutputDir.isDirectory()) {
+                System.out.println("The specified output directory is not a directory!.");
+                System.exit(1);
+            }
+            
+            if(!fOutputDir.canWrite()){
+                System.out.println("Cannot write to output directory!");
+                System.exit(1);            
+            }
             
             XMLInputFactory factory = XMLInputFactory.newInstance();
 
@@ -557,7 +572,7 @@ public class BulkCMXMLParser {
         //Write the 3GPP defined MOs to files.
         PrintWriter pw = null;
         if(!output3GPPMOPWMap.containsKey(mo)){
-            String moFile = outDirectory + File.separatorChar + mo + ".csv";
+            String moFile = outputDirectory + File.separatorChar + mo + ".csv";
             try {
                 output3GPPMOPWMap.put(mo, new PrintWriter(new File(moFile)));
                 output3GPPMOPWMap.get(mo).println(paramNames);
@@ -631,7 +646,7 @@ public class BulkCMXMLParser {
         //Write the parameters and values to files.
         PrintWriter pw = null;
         if (!outputVsDataTypePWMap.containsKey(vsDataType)) {
-            String moFile = outDirectory + File.separatorChar + vsDataType + ".csv";
+            String moFile = outputDirectory + File.separatorChar + vsDataType + ".csv";
             try {
                 outputVsDataTypePWMap.put(vsDataType, new PrintWriter(new File(moFile)));
                 outputVsDataTypePWMap.get(vsDataType).println(paramNames);
@@ -700,7 +715,7 @@ public class BulkCMXMLParser {
      */
     static public void showHelp(){
         System.out.println("3GPP Bulk CM XML to csv parser.");
-        System.out.println("Usage: parser <fileToParser.xml>");
+        System.out.println("Usage: parser <fileToParser.xml> <outputDirectory>");
     }
     
     /**
