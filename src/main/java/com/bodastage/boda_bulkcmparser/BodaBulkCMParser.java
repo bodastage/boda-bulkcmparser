@@ -456,7 +456,7 @@ public class BodaBulkCMParser {
                        
             //Handle multivalued paramenters
             if(vsDataTypeStack.containsKey(newTag)){
-                if(vsDataTypeStack.get(newTag) == null){
+                if(vsDataTypeStack.get(newTag) != null){
                     newValue = vsDataTypeStack.get(newTag) + multiValueSeparetor + tagData;
                 }
             }
@@ -726,8 +726,10 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      */
     static public String getFileBasename(String filename){
-        String[] splitArray;
-        splitArray = filename.split(File.separatorChar + "");
-        return splitArray[splitArray.length-1];
+        try{
+            return new File(filename).getName();
+        }catch(Exception e ){
+            return filename;
+        }
     }
 }
