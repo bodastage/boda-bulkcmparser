@@ -78,7 +78,7 @@ public class BodaBulkCMParserTest
             new File(sampleBulkCMFile).delete();
             
             for(int i=0; i<expectedFiles.length;i++){
-                //new File( expectedFiles[i]).delete();
+                new File( expectedFiles[i]).delete();
             }
             
         }catch(Exception e){

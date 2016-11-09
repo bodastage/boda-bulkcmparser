@@ -119,7 +119,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String multiValueSeparetor = ",";
+    static String multiValueSeparetor = ";";
 
     /**
      * For attributes with children, define parameter-child separator
@@ -406,7 +406,10 @@ public class BodaBulkCMParser {
      */
     public static void characterEvent(XMLEvent xmlEvent) {
         Characters characters = xmlEvent.asCharacters();
-        tagData = characters.getData(); //.replace("\n", "");
+        if(!characters.isWhiteSpace()){
+            tagData = characters.getData(); 
+        }
+        
     }
 
     public static void endELementEvent(XMLEvent xmlEvent)
