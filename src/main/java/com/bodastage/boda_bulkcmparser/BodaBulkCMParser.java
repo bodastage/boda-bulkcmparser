@@ -3,9 +3,10 @@
  *
  * @author Bodastage<info@bodastage.com>
  * @version 1.0.0
- * @see http://github.com/bodastage/openran-cm-bulkcmparsers
+ * @see http://github.com/bodastage/boda-bulkcmparsers
  */
-package bodastage.openran.cm;
+
+package main.java.com.bodastage.boda_bulkcmparser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,8 +25,7 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-public class BulkCMXMLParser {
-
+public class BodaBulkCMParser {
     /**
      * Tracks XML elements.
      *
@@ -48,7 +48,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<Integer, Map<String, String>> xmlAttrStack = new HashMap<>();
+    static Map<Integer, Map<String, String>> xmlAttrStack = new HashMap<Integer, Map<String, String>>();
 
     /**
      * Tracks Managed Object specific 3GPP attributes.
@@ -58,7 +58,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<Integer, Map<String, String>> threeGPPAttrStack = new HashMap<>();
+    static Map<Integer, Map<String, String>> threeGPPAttrStack = new HashMap<Integer, Map<String, String>>();
 
     /**
      * Marks start of processing per MO attributes.
@@ -85,7 +85,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, String> vsDataContainerTypeMap = new HashMap<>();
+    static Map<String, String> vsDataContainerTypeMap = new HashMap<String, String>();
 
     /**
      * Tracks current vsDataType if not null
@@ -101,7 +101,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.1.0
      */
-    static Map<String, String> vsDataTypeStack = new HashMap<>();
+    static Map<String, String> vsDataTypeStack = new HashMap<String, String>();
 
     /**
      * Real stack to push and pop vsDataType attributes.
@@ -134,7 +134,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> outputFilePW = new HashMap<>();
+    static Map<String, PrintWriter> outputFilePW = new HashMap<String, PrintWriter>();
 
     /**
      * Output directory.
@@ -184,7 +184,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, String> parentChildParameters = new HashMap<>();
+    static Map<String, String> parentChildParameters = new HashMap<String, String>();
 
     /**
      * A map of MO to printwriter.
@@ -192,7 +192,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> outputVsDataTypePWMap = new HashMap<>();
+    static Map<String, PrintWriter> outputVsDataTypePWMap = new HashMap<String, PrintWriter>();
 
     /**
      * A map of 3GPP MOs to their file print writers.
@@ -200,7 +200,7 @@ public class BulkCMXMLParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> output3GPPMOPWMap = new HashMap<>();
+    static Map<String, PrintWriter> output3GPPMOPWMap = new HashMap<String, PrintWriter>();
     
     /**
      * Bulk CM XML file name. The file we are parsing.
@@ -301,7 +301,7 @@ public class BulkCMXMLParser {
             while (attributes.hasNext()) {
                 Attribute attribute = attributes.next();
                 if (attribute.getName().toString().equals("id")) {
-                    Map<String, String> m = new HashMap<>();
+                    Map<String, String> m = new HashMap<String, String>();
                     m.put("id", attribute.getValue());
                     xmlAttrStack.put(depth, m);
                 }
@@ -355,7 +355,7 @@ public class BulkCMXMLParser {
                     mm.put(attribute.getName().getLocalPart(), attribute.getValue());
                     xmlAttrStack.replace(depth, mm);
                 } else {
-                    Map<String, String> m = new HashMap<>();
+                    Map<String, String> m = new HashMap<String, String>();
                     m.put(attribute.getName().getLocalPart(), attribute.getValue());
                     xmlAttrStack.put(depth, m);
                 }
@@ -367,7 +367,7 @@ public class BulkCMXMLParser {
         //E1.5
         if (attrMarker == true) {
 
-            Map<String, String> m = new HashMap<>();
+            Map<String, String> m = new HashMap<String, String>();
             if (threeGPPAttrStack.containsKey(depth)) {
                 m = threeGPPAttrStack.get(depth);
                 m.put(qName, null);
@@ -390,7 +390,7 @@ public class BulkCMXMLParser {
                 mm.put(attribute.getName().getLocalPart(), attribute.getValue());
                 xmlAttrStack.replace(depth, mm);
             } else {
-                Map<String, String> m = new HashMap<>();
+                Map<String, String> m = new HashMap<String, String>();
                 m.put(attribute.getName().getLocalPart(), attribute.getValue());
                 xmlAttrStack.put(depth, m);
             }
@@ -406,7 +406,7 @@ public class BulkCMXMLParser {
      */
     public static void characterEvent(XMLEvent xmlEvent) {
         Characters characters = xmlEvent.asCharacters();
-        tagData = characters.getData();
+        tagData = characters.getData(); //.replace("\n", "");
     }
 
     public static void endELementEvent(XMLEvent xmlEvent)
@@ -456,7 +456,9 @@ public class BulkCMXMLParser {
                        
             //Handle multivalued paramenters
             if(vsDataTypeStack.containsKey(newTag)){
-                newValue = vsDataTypeStack.get(newTag) + multiValueSeparetor + tagData;
+                if(vsDataTypeStack.get(newTag) == null){
+                    newValue = vsDataTypeStack.get(newTag) + multiValueSeparetor + tagData;
+                }
             }
                         
             //@TODO: Handle cases of multi values parameters and parameters with children
@@ -466,7 +468,7 @@ public class BulkCMXMLParser {
 
         //E3.5
         if (attrMarker == true && vsDataType == null) {
-            Map<String, String> m = new HashMap<>();
+            Map<String, String> m = new HashMap<String, String>();
             m = threeGPPAttrStack.get(depth);
             if (m.containsKey(qName)) {
                 m.replace(qName, tagData);
