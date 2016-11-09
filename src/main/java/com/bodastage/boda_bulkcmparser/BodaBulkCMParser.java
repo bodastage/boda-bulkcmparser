@@ -353,7 +353,8 @@ public class BodaBulkCMParser {
                 if (xmlAttrStack.containsKey(depth)) {
                     Map<String, String> mm = xmlAttrStack.get(depth);
                     mm.put(attribute.getName().getLocalPart(), attribute.getValue());
-                    xmlAttrStack.replace(depth, mm);
+                    //xmlAttrStack.replace(depth, mm); //Replace is only available in Java8
+                    xmlAttrStack.put(depth, mm);
                 } else {
                     Map<String, String> m = new HashMap<String, String>();
                     m.put(attribute.getName().getLocalPart(), attribute.getValue());
@@ -371,7 +372,8 @@ public class BodaBulkCMParser {
             if (threeGPPAttrStack.containsKey(depth)) {
                 m = threeGPPAttrStack.get(depth);
                 m.put(qName, null);
-                threeGPPAttrStack.replace(depth, m);
+                //threeGPPAttrStack.replace(depth, m); //replace only available in java 8
+                threeGPPAttrStack.put(depth, m);
             } else {
                 m.put(qName, null); //Initial value null
                 threeGPPAttrStack.put(depth, m);
@@ -388,7 +390,8 @@ public class BodaBulkCMParser {
             if (xmlAttrStack.containsKey(depth)) {
                 Map<String, String> mm = xmlAttrStack.get(depth);
                 mm.put(attribute.getName().getLocalPart(), attribute.getValue());
-                xmlAttrStack.replace(depth, mm);
+                //xmlAttrStack.replace(depth, mm);//
+                xmlAttrStack.put(depth, mm);
             } else {
                 Map<String, String> m = new HashMap<String, String>();
                 m.put(attribute.getName().getLocalPart(), attribute.getValue());
@@ -470,11 +473,12 @@ public class BodaBulkCMParser {
         if (attrMarker == true && vsDataType == null) {
             Map<String, String> m = new HashMap<String, String>();
             m = threeGPPAttrStack.get(depth);
-            if (m.containsKey(qName)) {
-                m.replace(qName, tagData);
-            } else {
-                m.put(qName, tagData);
-            }
+            m.put(qName, tagData);
+//            if (m.containsKey(qName)) {
+//                m.replace(qName, tagData);
+//            } else {
+//                m.put(qName, tagData);
+//            }
             threeGPPAttrStack.replace(depth, m);
             tagData = "";
         }
