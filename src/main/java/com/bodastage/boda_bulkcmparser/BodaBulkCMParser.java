@@ -48,7 +48,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<Integer, Map<String, String>> xmlAttrStack = new HashMap<Integer, Map<String, String>>();
+    static Map<Integer, Map<String, String>> xmlAttrStack = new LinkedHashMap<Integer, Map<String, String>>();
 
     /**
      * Tracks Managed Object specific 3GPP attributes.
@@ -58,7 +58,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<Integer, Map<String, String>> threeGPPAttrStack = new HashMap<Integer, Map<String, String>>();
+    static Map<Integer, Map<String, String>> threeGPPAttrStack = new LinkedHashMap<Integer, Map<String, String>>();
 
     /**
      * Marks start of processing per MO attributes.
@@ -85,7 +85,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, String> vsDataContainerTypeMap = new HashMap<String, String>();
+    static Map<String, String> vsDataContainerTypeMap = new LinkedHashMap<String, String>();
 
     /**
      * Tracks current vsDataType if not null
@@ -101,7 +101,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.1.0
      */
-    static Map<String, String> vsDataTypeStack = new HashMap<String, String>();
+    static Map<String, String> vsDataTypeStack = new LinkedHashMap<String, String>();
 
     /**
      * Real stack to push and pop vsDataType attributes.
@@ -134,7 +134,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> outputFilePW = new HashMap<String, PrintWriter>();
+    static Map<String, PrintWriter> outputFilePW = new LinkedHashMap<String, PrintWriter>();
 
     /**
      * Output directory.
@@ -184,7 +184,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, String> parentChildParameters = new HashMap<String, String>();
+    static Map<String, String> parentChildParameters = new LinkedHashMap<String, String>();
 
     /**
      * A map of MO to printwriter.
@@ -192,7 +192,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> outputVsDataTypePWMap = new HashMap<String, PrintWriter>();
+    static Map<String, PrintWriter> outputVsDataTypePWMap = new LinkedHashMap<String, PrintWriter>();
 
     /**
      * A map of 3GPP MOs to their file print writers.
@@ -200,7 +200,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> output3GPPMOPWMap = new HashMap<String, PrintWriter>();
+    static Map<String, PrintWriter> output3GPPMOPWMap = new LinkedHashMap<String, PrintWriter>();
     
     /**
      * Bulk CM XML file name. The file we are parsing.
@@ -301,7 +301,7 @@ public class BodaBulkCMParser {
             while (attributes.hasNext()) {
                 Attribute attribute = attributes.next();
                 if (attribute.getName().toString().equals("id")) {
-                    Map<String, String> m = new HashMap<String, String>();
+                    Map<String, String> m = new LinkedHashMap<String, String>();
                     m.put("id", attribute.getValue());
                     xmlAttrStack.put(depth, m);
                 }
@@ -355,7 +355,7 @@ public class BodaBulkCMParser {
                     mm.put(attribute.getName().getLocalPart(), attribute.getValue());
                     xmlAttrStack.put(depth, mm);
                 } else {
-                    Map<String, String> m = new HashMap<String, String>();
+                    Map<String, String> m = new LinkedHashMap<String, String>();
                     m.put(attribute.getName().getLocalPart(), attribute.getValue());
                     xmlAttrStack.put(depth, m);
                 }
@@ -367,7 +367,7 @@ public class BodaBulkCMParser {
         //E1.5
         if (attrMarker == true) {
 
-            Map<String, String> m = new HashMap<String, String>();
+            Map<String, String> m = new LinkedHashMap<String, String>();
             if (threeGPPAttrStack.containsKey(depth)) {
                 m = threeGPPAttrStack.get(depth);
                 m.put(qName, null);
@@ -390,7 +390,7 @@ public class BodaBulkCMParser {
                 mm.put(attribute.getName().getLocalPart(), attribute.getValue());
                 xmlAttrStack.put(depth, mm);
             } else {
-                Map<String, String> m = new HashMap<String, String>();
+                Map<String, String> m = new LinkedHashMap<String, String>();
                 m.put(attribute.getName().getLocalPart(), attribute.getValue());
                 xmlAttrStack.put(depth, m);
             }
@@ -453,25 +453,57 @@ public class BodaBulkCMParser {
             String newValue = tagData;
 
             //@TODO:Handle attributes with children
-            if (parentChildParameters.containsKey(qName)) {
+            if (parentChildParameters.containsKey(qName)) {//End of parent tag
+                
+                //Ware at the end of the parent tag so we remove the mapping
+                //as the child values have already been collected in 
+                //vsDataTypeStack.
+                parentChildParameters.remove(qName);
+                
+                //The top most value on the stack should be qName
+                if(vsDataTypeRlStack.size() > 0){ 
+                    vsDataTypeRlStack.pop();
+                }
+                
+                //Remove the parent tag from the stack so that we don't output 
+                //data for it. It's values are taked care of by its children.
+                vsDataTypeStack.remove(qName); 
+                                                
                 return;
             }
-                       
+            
+            //If size is greater than 1, then there is parent with chidren
+            if(vsDataTypeRlStack.size() > 1){
+                int len = vsDataTypeRlStack.size();
+                String parentTag = vsDataTypeRlStack.get(len-2).toString();
+                newTag = parentTag + parentChildAttrSeperator + qName;
+                
+                //Store the parent and it's child
+                parentChildParameters.put(parentTag,qName);
+                
+                //Remove this tag from the tag stack.
+                vsDataTypeStack.remove(qName);
+                
+            }
+            
             //Handle multivalued paramenters
             if(vsDataTypeStack.containsKey(newTag)){
                 if(vsDataTypeStack.get(newTag) != null){
                     newValue = vsDataTypeStack.get(newTag) + multiValueSeparetor + tagData;
                 }
             }
+            
                         
             //@TODO: Handle cases of multi values parameters and parameters with children
             //For now continue as if they do not exist
             vsDataTypeStack.put(newTag, newValue);
+            tagData = "";
+            if(vsDataTypeRlStack.size() > 0 )vsDataTypeRlStack.pop();
         }
 
         //E3.5
         if (attrMarker == true && vsDataType == null) {
-            Map<String, String> m = new HashMap<String, String>();
+            Map<String, String> m = new LinkedHashMap<String, String>();
             m = threeGPPAttrStack.get(depth);
             m.put(qName, tagData);
             threeGPPAttrStack.put(depth, m);
