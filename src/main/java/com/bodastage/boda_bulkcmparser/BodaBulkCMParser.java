@@ -691,7 +691,7 @@ public class BodaBulkCMParser {
                 Map.Entry<String, String> meMap = mIter.next();
                 String pName = parentMO + "_" + meMap.getKey();
                 paramNames = paramNames + "," + pName;
-                paramValues = paramValues + "," + meMap.getValue();
+                paramValues = paramValues + "," + toCSVFormat(meMap.getValue());
             }
         }
 
@@ -702,7 +702,7 @@ public class BodaBulkCMParser {
             while (iter.hasNext()) {
                 Map.Entry<String, String> meMap = iter.next();
                 paramNames = paramNames + "," + meMap.getKey();
-                paramValues = paramValues + "," + meMap.getValue();
+                paramValues = paramValues + "," + toCSVFormat(meMap.getValue());
             }
         }
         
@@ -759,7 +759,7 @@ public class BodaBulkCMParser {
             while (aIter.hasNext()) {
                 Map.Entry<String, String> meMap = aIter.next();
 
-                String pValue = meMap.getValue();
+                String pValue = toCSVFormat(meMap.getValue());
                 String pName = parentMO + "_" + meMap.getKey();
 
                 paramNames = paramNames + "," + pName;
