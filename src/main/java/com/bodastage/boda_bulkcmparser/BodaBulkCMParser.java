@@ -230,6 +230,18 @@ public class BodaBulkCMParser {
     
     static String bulkCMXMLFileBasename;
     
+    
+        /**
+     * Tracks Managed Object attributes to write to file. This is dictated by 
+     * the first instance of the MO found. 
+     * @TODO: Handle this better.
+     *
+     * @since 1.0.3
+     * @version 1.0.0
+     */
+    static Map<String, Stack> moColumns = new LinkedHashMap<String, Stack>();
+
+    
     /**
      * @param args the command line arguments
      *
@@ -739,19 +751,67 @@ public class BodaBulkCMParser {
                 paramValues = paramValues + "," + pValue;
             }
         }
+        
+        
+        //Create a map of the columns expected in MO. So that we can ensure that
+        //all rows have the same number of columns even if some of the parameters
+        //will be missing. 
+        //@TODO: This will be sorted by the config file.
+        //---------------------------------
+        //Make copy of the columns first
+        Stack columns = new Stack();
+        
+        boolean collectColumns = false;
+        if(!moColumns.containsKey(vsDataType)){
+            collectColumns = true;
+            moColumns.put(vsDataType, new Stack());
+            
+            //Get vendor specific attributes
+            Iterator<Map.Entry<String, String>> iter
+                    = vsDataTypeStack.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String, String> me = iter.next();
 
-        //Get vendor specific attributes
-        Iterator<Map.Entry<String, String>> iter
-                = vsDataTypeStack.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<String, String> me = iter.next();
+                //Collect the parameter for this vsDataType
+                if( collectColumns == true){
+                    Stack s = moColumns.get(vsDataType);
+                    s.push(me.getKey());
+                    moColumns.put(vsDataType,s);
+                }
 
-            String pValue = toCSVFormat(me.getValue());
-            String pName = me.getKey();
+                //We already have the expected columns if collectColumns is set to 
+                //fasle.
+                if(collectColumns == false){
+                    //Skip parameters not in the column list
+                    if(!columns.contains(me.getKey())){ 
+                        continue;
+                    }
+                }
 
-            paramNames = paramNames + "," + pName;
-            paramValues = paramValues + "," + pValue;
+                String pValue = toCSVFormat(me.getValue());
+                String pName = me.getKey();
+
+                paramNames = paramNames + "," + pName;
+                paramValues = paramValues + "," + pValue;
+            }
+
+        }else{ //When the columns for the MO have already been determined
+            columns = moColumns.get(vsDataType);
+            //Iterate through the columns already collected
+            for(int i = 0; i < columns.size(); i++ ){
+                String pName = columns.get(i).toString();
+                String pValue = "";
+                if(vsDataTypeStack.containsKey(pName)){
+                    pValue = toCSVFormat(vsDataTypeStack.get(pName));
+                }
+                
+                paramNames = paramNames + "," + pName;
+                paramValues = paramValues + "," + pValue;                
+            }
+            
         }
+        
+
 
         //Write the parameters and values to files.
         PrintWriter pw = null;
