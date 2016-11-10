@@ -323,7 +323,10 @@ public class BodaBulkCMParser {
 
         Iterator<Attribute> attributes = startElement.getAttributes();
 
-        //E1:0
+        
+        
+        //E1:0. xn:VsDataContainer encountered
+        //Push vendor speicific MOs to the xmlTagStack
         if (qName.equalsIgnoreCase("VsDataContainer")) {
             vsDCDepth++;
             depth++;
@@ -398,7 +401,7 @@ public class BodaBulkCMParser {
         }
 
         //E1.5
-        if (attrMarker == true) {
+        if (attrMarker == true && vsDataType == null ) {
 
             //Tracks hierachy of tags under xn:attributes.
             xnAttrRlStack.push(qName);
@@ -406,16 +409,23 @@ public class BodaBulkCMParser {
             Map<String, String> m = new LinkedHashMap<String, String>();
             if (threeGPPAttrStack.containsKey(depth)) {
                 m = threeGPPAttrStack.get(depth);
-                m.put(qName, null);
-                threeGPPAttrStack.put(depth, m);
+                
+                //Check if the parameter is already in the stack so that we dont
+                //over write it.
+                if(!m.containsKey(qName)){
+                    m.put(qName, null);
+                    threeGPPAttrStack.put(depth, m);
+                }
             } else {
                 m.put(qName, null); //Initial value null
                 threeGPPAttrStack.put(depth, m);
             }
             return;
         }
-
+        
+        
         //E1.6
+        //Push 3GPP Defined MOs to the xmlTagStack
         depth++;
         xmlTagStack.push(qName);
         while (attributes.hasNext()) {
@@ -463,6 +473,7 @@ public class BodaBulkCMParser {
             xmlTagStack.pop();
             xmlAttrStack.remove(depth);
             vsDataContainerTypeMap.remove(vsDCDepth);
+            threeGPPAttrStack.remove(depth);
             vsDCDepth--;
             depth--;
             return;
@@ -484,6 +495,7 @@ public class BodaBulkCMParser {
         }
 
         //E3:4
+        //Process parameters under <bs:vsDataSomeMO>..</bs:vsDataSomeMo>
         if (vsDataType != null && attrMarker == true) {//We are processing vsData<DataType> attributes
             String newTag = qName;
             String newValue = tagData;
@@ -553,7 +565,9 @@ public class BodaBulkCMParser {
                 
                 //Remove the parent from the threeGPPAttrStack so that we 
                 //don't output data for it.
-                threeGPPAttrStack.remove(qName);
+                Map<String, String> treMap = threeGPPAttrStack.get(depth);
+                treMap.remove(qName);
+                threeGPPAttrStack.put(depth,treMap);
                 
                 return;
             }
@@ -593,6 +607,7 @@ public class BodaBulkCMParser {
             threeGPPAttrStack.put(depth, m);
             tagData = "";
             xnAttrRlStack.pop();
+            return;
         }
 
         //E3:6 
