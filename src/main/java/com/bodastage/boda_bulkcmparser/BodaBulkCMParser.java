@@ -114,6 +114,16 @@ public class BodaBulkCMParser {
     static Stack vsDataTypeRlStack = new Stack();
 
     /**
+     * Real stack to push and pop  xn:attributes.
+     *
+     * This is used to track multivalued attributes and attributes with children
+     *
+     * @since 1.0.2
+     * @version 1.0.0
+     */
+    static Stack xnAttrRlStack = new Stack();
+    
+    /**
      * Multi-valued parameter separator.
      *
      * @since 1.0.0
@@ -179,13 +189,24 @@ public class BodaBulkCMParser {
     static String tagData = "";
 
     /**
-     * Tracking parameters with children.
+     * Tracking parameters with children under vsDataSomeMO.
      *
      * @since 1.0.0
      * @version 1.0.0
      */
     static Map<String, String> parentChildParameters = new LinkedHashMap<String, String>();
 
+    
+/**
+     * Tracking parameters with children in xn:attributes.
+     *
+     * @since 1.0.2
+     * @version 1.0.0
+     */
+    static Map<String, String> attrParentChildMap = new LinkedHashMap<String, String>();
+
+            
+    
     /**
      * A map of MO to printwriter.
      *
@@ -367,6 +388,9 @@ public class BodaBulkCMParser {
         //E1.5
         if (attrMarker == true) {
 
+            //Tracks hierachy of tags under xn:attributes.
+            xnAttrRlStack.push(qName);
+            
             Map<String, String> m = new LinkedHashMap<String, String>();
             if (threeGPPAttrStack.containsKey(depth)) {
                 m = threeGPPAttrStack.get(depth);
@@ -452,25 +476,25 @@ public class BodaBulkCMParser {
             String newTag = qName;
             String newValue = tagData;
 
-            //@TODO:Handle attributes with children
-            if (parentChildParameters.containsKey(qName)) {//End of parent tag
-                
-                //Ware at the end of the parent tag so we remove the mapping
-                //as the child values have already been collected in 
-                //vsDataTypeStack.
-                parentChildParameters.remove(qName);
-                
-                //The top most value on the stack should be qName
-                if(vsDataTypeRlStack.size() > 0){ 
-                    vsDataTypeRlStack.pop();
+                //Handle attributes with children
+                if (parentChildParameters.containsKey(qName)) {//End of parent tag
+
+                    //Ware at the end of the parent tag so we remove the mapping
+                    //as the child values have already been collected in 
+                    //vsDataTypeStack.
+                    parentChildParameters.remove(qName);
+
+                    //The top most value on the stack should be qName
+                    if(vsDataTypeRlStack.size() > 0){ 
+                        vsDataTypeRlStack.pop();
+                    }
+
+                    //Remove the parent tag from the stack so that we don't output 
+                    //data for it. It's values are taked care of by its children.
+                    vsDataTypeStack.remove(qName); 
+
+                    return;
                 }
-                
-                //Remove the parent tag from the stack so that we don't output 
-                //data for it. It's values are taked care of by its children.
-                vsDataTypeStack.remove(qName); 
-                                                
-                return;
-            }
             
             //If size is greater than 1, then there is parent with chidren
             if(vsDataTypeRlStack.size() > 1){
@@ -493,7 +517,6 @@ public class BodaBulkCMParser {
                 }
             }
             
-                        
             //@TODO: Handle cases of multi values parameters and parameters with children
             //For now continue as if they do not exist
             vsDataTypeStack.put(newTag, newValue);
@@ -502,12 +525,62 @@ public class BodaBulkCMParser {
         }
 
         //E3.5
+        //Process tags under xn:attributes.
         if (attrMarker == true && vsDataType == null) {
+            String newValue = tagData;
+            String newTag = qName;
+            
+            //Handle attributes with children.Do this when parent end tag is 
+            //encountered.
+            if( attrParentChildMap.containsKey(qName)){ //End of parent tag
+                //Remove parent child map
+                attrParentChildMap.remove(qName);
+                
+                //Remove the top most value from the stack.
+                xnAttrRlStack.pop();
+                
+                //Remove the parent from the threeGPPAttrStack so that we 
+                //don't output data for it.
+                threeGPPAttrStack.remove(qName);
+                
+                return;
+            }
+            
+            //Handle parent child attributes. Get the child value
+            int xnAttrRlStackLen = xnAttrRlStack.size();
+            if(xnAttrRlStackLen > 1){
+                String parentXnAttr 
+                        = xnAttrRlStack.get(xnAttrRlStackLen-2).toString();
+                newTag = parentXnAttr + parentChildAttrSeperator + qName;
+                
+                //Store parent child map
+                attrParentChildMap.put(parentXnAttr, qName);
+                
+                //Remove the child tag from the 3gpp xnAttribute stack
+                Map<String, String> cMap = threeGPPAttrStack.get(depth);
+                if(cMap.containsKey(qName)){
+                    cMap.remove(qName);
+                    threeGPPAttrStack.put(depth, cMap);
+                }
+                
+            }
+            
             Map<String, String> m = new LinkedHashMap<String, String>();
             m = threeGPPAttrStack.get(depth);
-            m.put(qName, tagData);
+            
+            //For multivaluted attributes , first check that the tag already 
+            //exits.
+            if(m.containsKey(newTag) && m.get(newTag) != null){
+                String oldValue = m.get(newTag);
+                String val = oldValue + multiValueSeparetor + newValue;
+                m.put(newTag, val);
+            }else{
+                m.put(newTag, newValue);
+            }
+            
             threeGPPAttrStack.put(depth, m);
             tagData = "";
+            xnAttrRlStack.pop();
         }
 
         //E3:6 
