@@ -243,16 +243,26 @@ public class BodaBulkCMParser {
 
     
     /**
+     * Parser start time. 
+     * 
+     * @since 1.0.4
+     * @version 1.0.0
+     */
+    final static long startTime = System.currentTimeMillis();
+    
+    
+    /**
      * @param args the command line arguments
      *
      * @since 1.0.0
      * @version 1.0.0
      */    
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    public static void main(String[] args) {
 
         try {
             
-            if(args.length != 2 ){
+            //show help
+            if(args.length != 2 || (args.length == 1 && args[0] == "-h")){
                 showHelp();
                 System.exit(1);
             }
@@ -264,12 +274,12 @@ public class BodaBulkCMParser {
             //privileges
             File fOutputDir = new File(outputDirectory);
             if(!fOutputDir.isDirectory()) {
-                System.out.println("The specified output directory is not a directory!.");
+                System.err.println("ERROR: The specified output directory is not a directory!.");
                 System.exit(1);
             }
             
             if(!fOutputDir.canWrite()){
-                System.out.println("Cannot write to output directory!");
+                System.err.println("ERROR: Cannot write to output directory!");
                 System.exit(1);            
             }
             
@@ -295,12 +305,20 @@ public class BodaBulkCMParser {
                 }
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.err.println("ERROR:" +e.getMessage());
+            System.exit(1);
         } catch (XMLStreamException e) {
-            e.printStackTrace();
+            System.err.println("ERROR:" + e.getMessage());
+            System.exit(1);
+        }catch (UnsupportedEncodingException e){
+            System.err.println("ERROR:" + e.getMessage());
+            System.exit(1);
         }
-
+        
         closeMOPWMap();
+        
+        printExecutionTime();
+        
     }
 
     /**
@@ -767,7 +785,6 @@ public class BodaBulkCMParser {
             }
         }
         
-        
         //Create a map of the columns expected in MO. So that we can ensure that
         //all rows have the same number of columns even if some of the parameters
         //will be missing. 
@@ -899,8 +916,9 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      */
     static public void showHelp(){
-        System.out.println("3GPP Bulk CM XML to csv parser.");
-        System.out.println("Usage: parser <fileToParser.xml> <outputDirectory>");
+        System.out.println("boda-bulkcmparser 1.0.4. Copyright (c) 2016 Bodastage(http://www.bodastage.com)");
+        System.out.println("Parses 3GPP Bulk CM XML to csv.");
+        System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml> <outputDirectory>");
     }
     
     /**
@@ -914,5 +932,48 @@ public class BodaBulkCMParser {
         }catch(Exception e ){
             return filename;
         }
+    }
+    
+    /**
+     * Print program's execution time.
+     * 
+     * @since 1.0.0
+     */
+    static public void printExecutionTime(){
+        float runningTime = System.currentTimeMillis() - startTime;
+        
+        String s = "PARSING COMPLETED:\n";
+        s = s + "Total time:";
+        
+        //Get hours
+        if( runningTime > 1000*60*60 ){
+            int hrs = (int) Math.floor(runningTime/(1000*60*60));
+            s = s + hrs + " hours ";
+            runningTime = runningTime - (hrs*1000*60*60);
+        }
+        
+        //Get minutes
+        if(runningTime > 1000*60){
+            int mins = (int) Math.floor(runningTime/(1000*60));
+            s = s + mins + " minutes ";
+            runningTime = runningTime - (mins*1000*60);
+        }
+        
+        //Get seconds
+        if(runningTime > 1000){
+            int secs = (int) Math.floor(runningTime/(1000));
+            s = s + secs + " seconds ";
+            runningTime = runningTime - (secs/1000);
+        }
+        
+        //Get milliseconds
+        if(runningTime > 0 ){
+            int msecs = (int) Math.floor(runningTime/(1000));
+            s = s + msecs + " milliseconds ";
+            runningTime = runningTime - (msecs/1000);
+        }
+
+        
+        System.out.println(s);
     }
 }
