@@ -111,9 +111,8 @@ public class BodaBulkCMParserTest
                 assertTrue(fileExists);
             }
 
-        } catch (UnsupportedEncodingException ex) {
+        } catch (Exception ex) {
             assertTrue(false);
-            //Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
