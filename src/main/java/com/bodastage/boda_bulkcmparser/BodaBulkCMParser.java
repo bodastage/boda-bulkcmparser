@@ -6,7 +6,7 @@
  * @see http://github.com/bodastage/boda-bulkcmparsers
  */
 
-package main.java.com.bodastage.boda_bulkcmparser;
+package com.bodastage.boda_bulkcmparser;
 
 import java.io.File;
 import java.io.FileNotFoundException;

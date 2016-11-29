@@ -22,7 +22,7 @@
       <configuration>
         <archive>
           <manifest>
-            <mainClass>main.java.com.bodastage.boda_bulkcmparser.BodaBulkCMParser</mainClass>
+            <mainClass>com.bodastage.boda_bulkcmparser.BodaBulkCMParser</mainClass>
           </manifest>
         </archive>
         <descriptorRefs>
