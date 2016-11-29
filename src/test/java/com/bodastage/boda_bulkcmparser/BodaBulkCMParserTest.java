@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import main.java.com.bodastage.boda_bulkcmparser.BodaBulkCMParser;
+import com.bodastage.boda_bulkcmparser.BodaBulkCMParser;
 import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.BulkCmConfigDataFile;
 import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.FileHeader;
 import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.FileFooter;
