@@ -1,4 +1,4 @@
-package test.java.com.bodastage.boda_bulkcmparser;
+package com.bodastage.boda_bulkcmparser;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;

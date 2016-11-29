@@ -687,7 +687,7 @@ public class BodaBulkCMParser {
 
         String mo = xmlTagStack.peek().toString();
 
-        String paramNames = "bulkCMFileName";
+        String paramNames = "FileName";
         String paramValues = bulkCMXMLFileBasename;
 
         //Parent IDs
@@ -749,7 +749,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      */
     public static void processVendorAttributes() {
-        String paramNames = "bulkCMFileName";
+        String paramNames = "FileName";
         String paramValues = bulkCMXMLFileBasename;
 
         //Parent MO IDs
@@ -942,7 +942,7 @@ public class BodaBulkCMParser {
     static public void printExecutionTime(){
         float runningTime = System.currentTimeMillis() - startTime;
         
-        String s = "PARSING COMPLETED:\n";
+        String s = "Parsing completed.\n";
         s = s + "Total time:";
         
         //Get hours
