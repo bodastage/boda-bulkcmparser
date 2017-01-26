@@ -9,7 +9,7 @@ The parser will convert from XML to csv any XML file that is complaint with TS 1
 java -jar  bulkcmparser.jar bulkcm.xml outputDirectory
 
 #Download and installation
-The lastest compiled jar file is availabled in the dist directory or get it [here](https://github.com/boda-stage/boda-bulkcmparser/blob/master/dist/boda-bulkcmparser.jar).
+The lastest compiled jar file is availabled in the dist directory or get it [here](https://github.com/bodastage/boda-bulkcmparser/blob/master/dist/boda-bulkcmparser.jar?raw=true).
 
 #Requirements
 To run the jar file, you need Java version 1.6 and above.
