@@ -318,6 +318,7 @@ public class BodaBulkCMParser {
             System.exit(1);
         }
         
+        String outputDirectory = args[1];      
         
         //Confirm that the output directory is a directory and has write 
         //privileges
