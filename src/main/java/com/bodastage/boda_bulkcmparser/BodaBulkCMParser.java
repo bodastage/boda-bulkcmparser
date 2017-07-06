@@ -35,7 +35,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Stack xmlTagStack = new Stack();
+    Stack xmlTagStack = new Stack();
 
     /**
      * Tracks how deep a Management Object is in the XML doc hierarchy.
@@ -43,7 +43,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Integer depth = 0;
+    Integer depth = 0;
 
     /**
      * Tracks XML attributes per Management Objects.
@@ -51,7 +51,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<Integer, Map<String, String>> xmlAttrStack = new LinkedHashMap<Integer, Map<String, String>>();
+    Map<Integer, Map<String, String>> xmlAttrStack = new LinkedHashMap<Integer, Map<String, String>>();
 
     /**
      * Tracks Managed Object specific 3GPP attributes.
@@ -61,7 +61,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<Integer, Map<String, String>> threeGPPAttrStack = new LinkedHashMap<Integer, Map<String, String>>();
+    Map<Integer, Map<String, String>> threeGPPAttrStack = new LinkedHashMap<Integer, Map<String, String>>();
 
     /**
      * Marks start of processing per MO attributes.
@@ -72,7 +72,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static boolean attrMarker = false;
+    boolean attrMarker = false;
 
     /**
      * Tracks the depth of VsDataContainer tags in the XML document hierarchy.
@@ -80,7 +80,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static int vsDCDepth = 0;
+    int vsDCDepth = 0;
 
     /**
      * Maps of vsDataContainer instances to vendor specific data types.
@@ -88,7 +88,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, String> vsDataContainerTypeMap = new LinkedHashMap<String, String>();
+    Map<String, String> vsDataContainerTypeMap = new LinkedHashMap<String, String>();
 
     /**
      * Tracks current vsDataType if not null
@@ -96,7 +96,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String vsDataType = null;
+    String vsDataType = null;
 
     /**
      * vsDataTypes stack.
@@ -104,7 +104,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.1.0
      */
-    static Map<String, String> vsDataTypeStack = new LinkedHashMap<String, String>();
+    Map<String, String> vsDataTypeStack = new LinkedHashMap<String, String>();
 
     /**
      * Real stack to push and pop vsDataType attributes.
@@ -114,7 +114,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Stack vsDataTypeRlStack = new Stack();
+    Stack vsDataTypeRlStack = new Stack();
 
     /**
      * Real stack to push and pop xn:attributes.
@@ -124,7 +124,7 @@ public class BodaBulkCMParser {
      * @since 1.0.2
      * @version 1.0.0
      */
-    static Stack xnAttrRlStack = new Stack();
+    Stack xnAttrRlStack = new Stack();
 
     /**
      * Multi-valued parameter separator.
@@ -132,14 +132,14 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String multiValueSeparetor = ";";
+    String multiValueSeparetor = ";";
 
     /**
      * For attributes with children, define parameter-child separator
      *
      * @since 1.0.0
      */
-    static String parentChildAttrSeperator = "_";
+    String parentChildAttrSeperator = "_";
 
     /**
      * Output file print writers
@@ -147,7 +147,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> outputFilePW = new LinkedHashMap<String, PrintWriter>();
+    Map<String, PrintWriter> outputFilePW = new LinkedHashMap<String, PrintWriter>();
 
     /**
      * Output directory.
@@ -155,7 +155,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String outputDirectory = "/tmp";
+    String outputDirectory = "/tmp";
 
     /**
      * Limit the number of iterations for testing.
@@ -163,7 +163,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static int testCounter = 0;
+    int testCounter = 0;
 
     /**
      * Start element tag.
@@ -173,7 +173,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String startElementTag = "";
+    String startElementTag = "";
 
     /**
      * Start element NS prefix.
@@ -181,7 +181,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String startElementTagPrefix = "";
+    String startElementTagPrefix = "";
 
     /**
      * Tag data.
@@ -189,7 +189,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static String tagData = "";
+    String tagData = "";
 
     /**
      * Tracking parameters with children under vsDataSomeMO.
@@ -197,7 +197,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, String> parentChildParameters = new LinkedHashMap<String, String>();
+    Map<String, String> parentChildParameters = new LinkedHashMap<String, String>();
 
     /**
      * Tracking parameters with children in xn:attributes.
@@ -205,7 +205,7 @@ public class BodaBulkCMParser {
      * @since 1.0.2
      * @version 1.0.0
      */
-    static Map<String, String> attrParentChildMap = new LinkedHashMap<String, String>();
+    Map<String, String> attrParentChildMap = new LinkedHashMap<String, String>();
 
     /**
      * A map of MO to printwriter.
@@ -213,7 +213,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> outputVsDataTypePWMap = new LinkedHashMap<String, PrintWriter>();
+    Map<String, PrintWriter> outputVsDataTypePWMap = new LinkedHashMap<String, PrintWriter>();
 
     /**
      * A map of 3GPP MOs to their file print writers.
@@ -221,14 +221,14 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static Map<String, PrintWriter> output3GPPMOPWMap = new LinkedHashMap<String, PrintWriter>();
+    Map<String, PrintWriter> output3GPPMOPWMap = new LinkedHashMap<String, PrintWriter>();
 
     /**
      * Bulk CM XML file name. The file we are parsing.
      */
-    static String bulkCMXMLFile;
+    String bulkCMXMLFile;
 
-    static String bulkCMXMLFileBasename;
+    String bulkCMXMLFileBasename;
 
     /**
      * Tracks Managed Object attributes to write to file. This is dictated by
@@ -239,7 +239,7 @@ public class BodaBulkCMParser {
      * @since 1.0.3
      * @version 1.0.0
      */
-    static Map<String, Stack> moColumns = new LinkedHashMap<String, Stack>();
+    Map<String, Stack> moColumns = new LinkedHashMap<String, Stack>();
 
     /**
      * The file/directory to be parsed.
@@ -262,13 +262,15 @@ public class BodaBulkCMParser {
      */
     private String baseFileName = "";
 
+    private String dateTime = "";
+    
     /**
      * Parser start time.
      *
      * @since 1.1.0
      * @version 1.1.0
      */
-    final static long startTime = System.currentTimeMillis();
+    final long startTime = System.currentTimeMillis();
 
     private int parserState = ParserStates.EXTRACTING_PARAMETERS;
 
@@ -312,9 +314,11 @@ public class BodaBulkCMParser {
 
         try{
             
+         BodaBulkCMParser theParser = new BodaBulkCMParser();
+            
         //show help
         if (args.length != 2 || (args.length == 1 && args[0] == "-h")) {
-            showHelp();
+            theParser.showHelp();
             System.exit(1);
         }
         
@@ -334,11 +338,11 @@ public class BodaBulkCMParser {
         }
 
         //Get bulk CM XML file to parse.
-        bulkCMXMLFile = args[0];
-        outputDirectory = args[1];
+        //bulkCMXMLFile = ;
+        //outputDirectory = args[1];
 
         BodaBulkCMParser cmParser = new BodaBulkCMParser();
-        cmParser.setDataSource(bulkCMXMLFile);
+        cmParser.setDataSource(args[0]);
         cmParser.setOutputDirectory(outputDirectory);
         cmParser.parse();
         }catch(Exception e){
@@ -363,6 +367,17 @@ public class BodaBulkCMParser {
             parserState = ParserStates.EXTRACTING_VALUES;
         }
 
+        //Reset variables
+            vsDataType = null;
+            vsDataTypeStack.clear();
+            vsDataTypeRlStack.clear();
+            xmlAttrStack.clear();
+            xmlTagStack.clear();
+            startElementTag = null; 
+            startElementTagPrefix = "";
+            attrMarker = false;
+            depth = 0;
+            
         //Extracting values
         if (parserState == ParserStates.EXTRACTING_VALUES) {
             processFileOrDirectory();
@@ -396,7 +411,19 @@ public class BodaBulkCMParser {
 
         if (isRegularExecutableFile) {
             this.setFileName(this.dataSource);
+            baseFileName =  getFileBasename(this.dataFile);
+            if( parserState == ParserStates.EXTRACTING_PARAMETERS){
+                System.out.print("Extracting parameters from " + this.baseFileName + "...");
+            }else{
+                System.out.print("Parsing " + this.baseFileName + "...");
+            }
             this.parseFile(this.dataSource);
+            if( parserState == ParserStates.EXTRACTING_PARAMETERS){
+                 System.out.println("Done.");
+            }else{
+                System.out.println("Done.");
+                //System.out.println(this.baseFileName + " successfully parsed.\n");
+            }
         }
 
         if (isReadableDirectory) {
@@ -509,7 +536,7 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      *
      */
-    public static void startElementEvent(XMLEvent xmlEvent) {
+    public void startElementEvent(XMLEvent xmlEvent) {
 
         StartElement startElement = xmlEvent.asStartElement();
         String qName = startElement.getName().getLocalPart();
@@ -520,6 +547,15 @@ public class BodaBulkCMParser {
 
         Iterator<Attribute> attributes = startElement.getAttributes();
 
+        if(qName.equals("fileFooter") && ParserStates.EXTRACTING_PARAMETERS == parserState){
+            while (attributes.hasNext()) {
+                Attribute attribute = attributes.next();
+                if (attribute.getName().toString().equals("dateTime")) {
+                    dateTime = attribute.getValue();
+                }
+            }
+        }
+        
         //E1:0. xn:VsDataContainer encountered
         //Push vendor speicific MOs to the xmlTagStack
         if (qName.equalsIgnoreCase("VsDataContainer")) {
@@ -644,7 +680,7 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      * @since 1.0.0
      */
-    public static void characterEvent(XMLEvent xmlEvent) {
+    public void characterEvent(XMLEvent xmlEvent) {
         Characters characters = xmlEvent.asCharacters();
         if (!characters.isWhiteSpace()) {
             tagData = characters.getData();
@@ -825,8 +861,9 @@ public class BodaBulkCMParser {
                 theTag = qName + "_" + occurences;
             }
 
-            
-            process3GPPAttributes();
+            if( parserState != ParserStates.EXTRACTING_PARAMETERS){
+                process3GPPAttributes();
+            }
 
             xmlTagStack.pop();
             xmlAttrStack.remove(depth);
@@ -846,7 +883,7 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      * @return Integer Number of tag occurrences.
      */
-    public static Integer getXMLTagOccurences(String tagName) {
+    public Integer getXMLTagOccurences(String tagName) {
         int tagOccurences = 0;
         Iterator<String> iter = xmlTagStack.iterator();
         while (iter.hasNext()) {
@@ -867,13 +904,13 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      * @since 1.0.0
      */
-    public static void process3GPPAttributes()
+    public void process3GPPAttributes()
             throws FileNotFoundException, UnsupportedEncodingException {
 
         String mo = xmlTagStack.peek().toString();
 
-        String paramNames = "FileName";
-        String paramValues = bulkCMXMLFileBasename;
+        String paramNames = "FileName,varDateTime";
+        String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
         //Parent IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
@@ -933,9 +970,9 @@ public class BodaBulkCMParser {
      * @verison 1.0.0
      * @since 1.0.0
      */
-    public static void processVendorAttributes() {
-        String paramNames = "FileName";
-        String paramValues = bulkCMXMLFileBasename;
+    public void processVendorAttributes() {
+        String paramNames = "FileName,varDateTime";
+        String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
         //Parent MO IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
@@ -1034,7 +1071,7 @@ public class BodaBulkCMParser {
      * @param s String
      * @return String Formated version of input string
      */
-    public static String toCSVFormat(String s) {
+    public String toCSVFormat(String s) {
         String csvValue = s;
 
         //Check if value contains comma
@@ -1055,7 +1092,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    public static void closeMOPWMap() {
+    public void closeMOPWMap() {
         Iterator<Map.Entry<String, PrintWriter>> iter
                 = outputVsDataTypePWMap.entrySet().iterator();
         while (iter.hasNext()) {
@@ -1078,7 +1115,7 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      * @version 1.0.0
      */
-    static public void showHelp() {
+    public void showHelp() {
         System.out.println("boda-bulkcmparser 1.1.0 Copyright (c) 2017 Bodastage(http://www.bodastage.com)");
         System.out.println("Parses 3GPP Bulk CM XML to csv.");
         System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml|Directory> <outputDirectory>");
@@ -1089,7 +1126,7 @@ public class BodaBulkCMParser {
      *
      * @since 1.0.0
      */
-    static public String getFileBasename(String filename) {
+    public String getFileBasename(String filename) {
         try {
             return new File(filename).getName();
         } catch (Exception e) {
@@ -1113,7 +1150,7 @@ public class BodaBulkCMParser {
      *
      * @since 1.0.0
      */
-    static public void printExecutionTime() {
+    public void printExecutionTime() {
         float runningTime = System.currentTimeMillis() - startTime;
 
         String s = "Parsing completed.\n";

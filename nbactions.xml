@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-clean_compile_assembly_single</actionName>
+            <displayName>clean_compile_assembly_single</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>compile</goal>
+                <goal>assembly:single</goal>
+            </goals>
+        </action>
+    </actions>
