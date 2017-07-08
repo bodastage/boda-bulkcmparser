@@ -1,7 +1,7 @@
 /*
  * File footer.
  */
-package test.java.com.bodastage.boda_bulkcmparser.bulkcmxml;
+package com.bodastage.boda_bulkcmparser.bulkcmxml;
 
 import javax.xml.bind.annotation.XmlAttribute;
 

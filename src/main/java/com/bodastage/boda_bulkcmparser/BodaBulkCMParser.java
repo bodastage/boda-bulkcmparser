@@ -242,6 +242,13 @@ public class BodaBulkCMParser {
     Map<String, Stack> moColumns = new LinkedHashMap<String, Stack>();
 
     /**
+     * Tracks the IDs of the parent elements
+     * 
+     * @since 1.2.0
+     */
+    Map<String, Stack> moColumnsParentIds = new LinkedHashMap<String, Stack>();
+    
+    /**
      * The file/directory to be parsed.
      *
      * @since 1.1.0
@@ -974,6 +981,8 @@ public class BodaBulkCMParser {
         String paramNames = "FileName,varDateTime";
         String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
+        Map<String,String> parentIdValues = new LinkedHashMap<String, String>();
+        
         //Parent MO IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
 
@@ -995,18 +1004,33 @@ public class BodaBulkCMParser {
             }
             Iterator<Map.Entry<String, String>> aIter
                     = xmlAttrStack.get(depthKey).entrySet().iterator();
-
+            
             while (aIter.hasNext()) {
                 Map.Entry<String, String> meMap = aIter.next();
 
                 String pValue = toCSVFormat(meMap.getValue());
                 String pName = parentMO + "_" + meMap.getKey();
 
-                paramNames = paramNames + "," + pName;
-                paramValues = paramValues + "," + pValue;
+                parentIdValues.put(pName, pValue);
+
             }
         }
 
+        
+        Stack parentIds = moColumnsParentIds.get(vsDataType);
+        for (int idx = 0; idx < parentIds.size(); idx++) {
+
+            String pName = (String)parentIds.get(idx);
+
+            String pValue= "";
+            if( parentIdValues.containsKey(pName)){
+                pValue = parentIdValues.get(pName);
+            }
+
+            paramNames = paramNames + "," + pName;
+            paramValues = paramValues + "," + pValue;
+        }
+        
         //Make copy of the columns first
         Stack columns = new Stack();
 
@@ -1047,9 +1071,11 @@ public class BodaBulkCMParser {
     private void collectVendorMOColumns(){
         if (!moColumns.containsKey(vsDataType)) {
             moColumns.put(vsDataType, new Stack());
+            moColumnsParentIds.put(vsDataType, new Stack()); //Holds parent element IDs
         }
 
         Stack s = moColumns.get(vsDataType); 
+        Stack parentIDStack = moColumnsParentIds.get(vsDataType); 
 
         //Get vendor specific attributes
         Iterator<Map.Entry<String, String>> iter
@@ -1062,6 +1088,42 @@ public class BodaBulkCMParser {
             }
         }
         moColumns.replace(vsDataType, s);
+        
+        //
+        //Parent IDs
+        for (int i = 0; i < xmlTagStack.size(); i++) {
+            String parentMO = xmlTagStack.get(i).toString();
+
+            //If the parent tag is VsDataContainer, look for the 
+            //vendor specific MO in the vsDataContainer-to-vsDataType map.
+            if (parentMO.startsWith("VsDataContainer")) {
+                parentMO = vsDataContainerTypeMap.get(parentMO);
+            }
+            
+            //The depth at each xml tag index is  index+1 
+            int depthKey = i + 1;
+
+            //Iterate through the XML attribute tags for the element.
+            if (xmlAttrStack.get(depthKey) == null) {
+                continue; //Skip null values
+            }
+
+            Iterator<Map.Entry<String, String>> mIter
+                    = xmlAttrStack.get(depthKey).entrySet().iterator();
+
+            while (mIter.hasNext()) {
+                Map.Entry<String, String> meMap = mIter.next();
+                //String pName = meMap.getKey();
+                String pName = parentMO + "_" + meMap.getKey();
+                
+                if( parentIDStack.search(pName ) < 0 ){
+                    parentIDStack.push(pName);
+                }
+            }
+        }
+
+        moColumnsParentIds.replace(vsDataType, parentIDStack);
+
     }
 
     /**
@@ -1116,7 +1178,7 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      */
     public void showHelp() {
-        System.out.println("boda-bulkcmparser 1.1.0 Copyright (c) 2017 Bodastage(http://www.bodastage.com)");
+        System.out.println("boda-bulkcmparser 1.2.0 Copyright (c) 2017 Bodastage(http://www.bodastage.com)");
         System.out.println("Parses 3GPP Bulk CM XML to csv.");
         System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml|Directory> <outputDirectory>");
     }

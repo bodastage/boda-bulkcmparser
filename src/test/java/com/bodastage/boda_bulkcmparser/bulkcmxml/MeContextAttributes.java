@@ -1,7 +1,7 @@
 /*
  * Me Context
  */
-package test.java.com.bodastage.boda_bulkcmparser.bulkcmxml;
+package com.bodastage.boda_bulkcmparser.bulkcmxml;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;

@@ -1,7 +1,7 @@
 /*
  * Managed Element.
  */
-package test.java.com.bodastage.boda_bulkcmparser.bulkcmxml;
+package com.bodastage.boda_bulkcmparser.bulkcmxml;
 
 /**
  *

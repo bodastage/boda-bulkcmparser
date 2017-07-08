@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package test.java.com.bodastage.boda_bulkcmparser.bulkcmxml;
+package com.bodastage.boda_bulkcmparser.bulkcmxml;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;

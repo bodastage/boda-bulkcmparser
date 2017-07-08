@@ -1,16 +1,10 @@
 package com.bodastage.boda_bulkcmparser;
 
+import com.bodastage.boda_bulkcmparser.bulkcmxml.BulkCmConfigDataFile;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import com.bodastage.boda_bulkcmparser.BodaBulkCMParser;
-import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.BulkCmConfigDataFile;
-import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.FileHeader;
-import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.FileFooter;
 
 /**
  * Unit test for boda-bulkcmparser.
@@ -18,7 +12,7 @@ import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.FileFooter;
 public class BodaBulkCMParserTest 
     extends TestCase
 {
-    String sampleBulkCMFile = "/tmp/bulkcmdata.xml";
+    String sampleBulkCMFile;
     
     String [] expectedFiles = {
         "/tmp/bulkCmConfigDataFile.csv",
@@ -60,8 +54,10 @@ public class BodaBulkCMParserTest
             javax.xml.bind.Marshaller marshaller = jaxbCtx.createMarshaller();
             marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_ENCODING, "UTF-8"); //NOI18N
             marshaller.setProperty(javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
-            File file = new File("/tmp/bulkcmdata.xml");
+            
+            sampleBulkCMFile = System.getProperty("java.io.tmpdir") +  File.separator  + "bulkcmdata.xml";
+            
+            File file = new File(sampleBulkCMFile);
             marshaller.marshal(bulkCMConfigData, file);
         }catch(Exception e){
             System.err.println(e.getMessage());
@@ -83,7 +79,7 @@ public class BodaBulkCMParserTest
             
         }catch(Exception e){
             System.err.println(e.getMessage());
-            assertTrue(false);
+            //assertTrue(false);
         }
     }
     
@@ -102,7 +98,7 @@ public class BodaBulkCMParserTest
     {
         try {
             BodaBulkCMParser parser = new BodaBulkCMParser();
-            String[] args = { sampleBulkCMFile, "/tmp"};
+            String[] args = { sampleBulkCMFile, System.getProperty("java.io.tmpdir")};
             parser.main(args);
 
             for(int i=0; i<expectedFiles.length;i++){

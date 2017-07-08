@@ -10,5 +10,5 @@
 	@XmlNs(prefix="xsi", namespaceURI="http://www.w3.org/2001/XMLSchema-instance")
     }
   )
-package test.java.com.bodastage.boda_bulkcmparser.bulkcmxml;
+package com.bodastage.boda_bulkcmparser.bulkcmxml;
 import javax.xml.bind.annotation.*;

@@ -1,12 +1,11 @@
 /*
  *@author Bodastage<info@bodastage.com>
  */
-package test.java.com.bodastage.boda_bulkcmparser.bulkcmxml;
+package com.bodastage.boda_bulkcmparser.bulkcmxml;
 
 import javax.xml.bind.annotation.*;
-import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.FileFooter;
-import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.ConfigData;
-import test.java.com.bodastage.boda_bulkcmparser.bulkcmxml.FileFooter;
+import com.bodastage.boda_bulkcmparser.bulkcmxml.FileFooter;
+import com.bodastage.boda_bulkcmparser.bulkcmxml.ConfigData;
 
  @XmlRootElement(name = "bulkCmConfigDataFile", namespace = "")
 public class BulkCmConfigDataFile {
