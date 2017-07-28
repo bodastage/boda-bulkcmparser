@@ -79,7 +79,7 @@ public class BodaBulkCMParserTest
             
         }catch(Exception e){
             System.err.println(e.getMessage());
-            //assertTrue(false);
+            assertTrue(false);
         }
     }
     

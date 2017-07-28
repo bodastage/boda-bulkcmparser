@@ -29,6 +29,14 @@ import javax.xml.stream.events.XMLEvent;
 
 public class BodaBulkCMParser {
 
+    
+    /**
+     * Current release version 
+     * 
+     * Since 1.3.0
+     */
+    final String VERSION = "1.3.0";
+    
     /**
      * Tracks XML elements.
      *
@@ -247,6 +255,13 @@ public class BodaBulkCMParser {
      * @since 1.2.0
      */
     Map<String, Stack> moColumnsParentIds = new LinkedHashMap<String, Stack>();
+    
+    /**
+     * A map of 3GPP attributes to the 3GPP MOs
+     * 
+     * @since 1.3.0
+     */
+    Map<String, Stack> moThreeGPPAttrMap = new LinkedHashMap<String, Stack>();
     
     /**
      * The file/directory to be parsed.
@@ -719,6 +734,10 @@ public class BodaBulkCMParser {
         //3.2 </xn:attributes>
         if (qName.equals("attributes")) {
             attrMarker = false;
+            
+            if(parserState == ParserStates.EXTRACTING_PARAMETERS && vsDataType == null){
+                updateThreeGPPAttrMap();
+            }
             return;
         }
 
@@ -941,18 +960,33 @@ public class BodaBulkCMParser {
                 paramValues = paramValues + "," + toCSVFormat(meMap.getValue());
             }
         }
+        
+        //Some MOs dont have 3GPP attributes e.g. the fileHeader 
+        //and the fileFooter
+        if( moThreeGPPAttrMap.get(mo) != null ){
+            //Get 3GPP attributes for MO at the current depth
+              Stack a3GPPAtrr = moThreeGPPAttrMap.get(mo);
+              Map<String,String> current3GPPAttrs = null;
 
-        //Get 3GPP parameters for the MO at the current depth.
-        if (!threeGPPAttrStack.isEmpty() && threeGPPAttrStack.get(depth) != null) {
-            Iterator<Map.Entry<String, String>> iter
-                    = threeGPPAttrStack.get(depth).entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry<String, String> meMap = iter.next();
-                paramNames = paramNames + "," + meMap.getKey();
-                paramValues = paramValues + "," + toCSVFormat(meMap.getValue());
-            }
-        }
+              if (!threeGPPAttrStack.isEmpty() && threeGPPAttrStack.get(depth) != null) {
+                  current3GPPAttrs = threeGPPAttrStack.get(depth);
+              }
 
+              for(int i =0; i < a3GPPAtrr.size();i++){
+                  String aAttr = (String)a3GPPAtrr.get(i);
+                  String aValue= "";
+
+                  if( current3GPPAttrs != null && current3GPPAttrs.containsKey(aAttr)){
+                      aValue = toCSVFormat(current3GPPAttrs.get(aAttr));
+                  }
+
+                  paramNames = paramNames + "," + aAttr;
+                  paramValues = paramValues + "," + aValue;
+              }
+         }
+  
+
+        
         //Write the 3GPP defined MOs to files.
         PrintWriter pw = null;
         if (!output3GPPMOPWMap.containsKey(mo)) {
@@ -1063,6 +1097,55 @@ public class BodaBulkCMParser {
         pw = outputVsDataTypePWMap.get(vsDataType);
         pw.println(paramValues);
 
+    }
+    
+    
+    /**
+     * Update the map of 3GPP MOs to attributes.
+     * 
+     * This is necessary to ensure the final output in the csv is aligned.
+     * 
+     * @since 1.3.0
+     */
+    private void updateThreeGPPAttrMap(){
+        if( xmlTagStack == null || xmlTagStack.isEmpty() ) return;
+        
+        String mo = xmlTagStack.peek().toString();
+        
+        //Hold the current 3GPP attributes
+        HashMap<String, String> tgppAttrs = null;
+        
+        Stack attrs =  new Stack();
+        
+        //Initialize if the MO does not exist
+        if(!moThreeGPPAttrMap.containsKey(mo)){
+            moThreeGPPAttrMap.put(mo, new Stack());
+        }
+        
+      
+        //The attributes stack can be empty if the MO has no 3GPP attributes
+        if(threeGPPAttrStack.isEmpty() || threeGPPAttrStack.get(depth) == null){
+            return;
+        }
+        tgppAttrs = (LinkedHashMap<String, String>) threeGPPAttrStack.get(depth);
+        
+        
+        attrs = moThreeGPPAttrMap.get(mo);
+        
+        if(tgppAttrs != null){
+            //Get vendor specific attributes
+            Iterator<Map.Entry<String, String>> iter
+                    = tgppAttrs.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String, String> me = iter.next();
+                String parameter = me.getKey();
+                if( !attrs.contains( parameter ) ){
+                    attrs.push(parameter);
+                }
+            }
+            moThreeGPPAttrMap.replace(mo, attrs);
+
+        }
     }
     
     /**
@@ -1178,7 +1261,7 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      */
     public void showHelp() {
-        System.out.println("boda-bulkcmparser 1.2.0 Copyright (c) 2017 Bodastage(http://www.bodastage.com)");
+        System.out.println("boda-bulkcmparser "+ VERSION +" Copyright (c) 2017 Bodastage(http://www.bodastage.com)");
         System.out.println("Parses 3GPP Bulk CM XML to csv.");
         System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml|Directory> <outputDirectory>");
     }

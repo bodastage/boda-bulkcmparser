@@ -9,4 +9,11 @@
                 <goal>assembly:single</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-test</actionName>
+            <displayName>test</displayName>
+            <goals>
+                <goal>test</goal>
+            </goals>
+        </action>
     </actions>
