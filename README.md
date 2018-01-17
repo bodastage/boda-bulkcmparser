@@ -18,7 +18,7 @@ To run the jar file, you need Java version 1.8 and above.
 To report issues with the application or request new features use the issue [tracker](https://github.com/boda-stage/boda-bulkcmparser/issues). For help and customizations send an email to info@bodastage.com.
 
 # Credits
-[Bodastage](http://www.bodastage.com) - info@bodastage.co
+[Bodastage Solutions](http://www.bodastage.com) - info@bodastage.com
 
 # Contact
 For any other concerns apart from issues and feature requests, send an email to info@bodastage.com.
