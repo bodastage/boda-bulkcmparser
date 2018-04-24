@@ -7,9 +7,11 @@
  */
 package com.bodastage.boda_bulkcmparser;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -35,7 +37,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final String VERSION = "1.3.0";
+    final String VERSION = "1.3.1";
     
     /**
      * Tracks XML elements.
@@ -297,6 +299,41 @@ public class BodaBulkCMParser {
     private int parserState = ParserStates.EXTRACTING_PARAMETERS;
 
     /**
+     * parameter selection file
+     */
+    private String parameterFile = null;
+    
+  /**
+     * Extract parameter list from  parameter file
+     * 
+     * @param filename 
+     */
+    public  void getParametersToExtract(String filename) throws FileNotFoundException, IOException{
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        for(String line; (line = br.readLine()) != null; ) {
+           String [] moAndParameters =  line.split(":");
+           String mo = moAndParameters[0];
+           String [] parameters = moAndParameters[1].split(",");
+           
+           Stack parameterStack = new Stack();
+           for(int i =0; i < parameters.length; i++){
+               parameterStack.push(parameters[i]);
+           }
+           
+           if(mo.startsWith("vsData")){
+                moColumns.put(mo, parameterStack);
+                moColumnsParentIds.put(mo, new Stack());
+           }else{
+                moThreeGPPAttrMap.put(mo, parameterStack);
+           }
+
+        }
+        
+        //Move to the parameter value extraction stage
+        //parserState = ParserStates.EXTRACTING_VALUES;
+    }
+    
+    /**
      * @param inputFilename
      * @param outputDirectory
      */
@@ -326,6 +363,10 @@ public class BodaBulkCMParser {
 
     }
 
+    public void setParameterFile(String filename){
+        parameterFile = filename;
+    }
+    
     /**
      * @param args the command line arguments
      *
@@ -339,7 +380,7 @@ public class BodaBulkCMParser {
          BodaBulkCMParser theParser = new BodaBulkCMParser();
             
         //show help
-        if (args.length != 2 || (args.length == 1 && args[0] == "-h")) {
+        if( (args.length != 2 && args.length != 3) || (args.length == 1 && args[0] == "-h")){
             theParser.showHelp();
             System.exit(1);
         }
@@ -364,6 +405,15 @@ public class BodaBulkCMParser {
         //outputDirectory = args[1];
 
         BodaBulkCMParser cmParser = new BodaBulkCMParser();
+        
+        if(  args.length == 3  ){
+            File f = new File(args[2]);
+            if(f.isFile()){
+               cmParser.setParameterFile(args[2]);
+               cmParser.getParametersToExtract(args[2]);
+            }
+        }
+        
         cmParser.setDataSource(args[0]);
         cmParser.setOutputDirectory(outputDirectory);
         cmParser.parse();
@@ -505,15 +555,6 @@ public class BodaBulkCMParser {
                 System.exit(1);
             }
 
-            //Expiry check 
-            Date expiryDate = new GregorianCalendar(2017, Calendar.AUGUST, 01).getTime();
-            Date todayDate = new Date();
-            //System.out.println(todayDate);
-            //System.out.println(expiryDate);
-            if (todayDate.after(expiryDate)) {
-                System.out.println("Parser has expired. Please request new version from www.telecomhall.net");
-                System.exit(1);
-            }
 
             XMLInputFactory factory = XMLInputFactory.newInstance();
 
@@ -935,9 +976,15 @@ public class BodaBulkCMParser {
 
         String mo = xmlTagStack.peek().toString();
 
+        if(parameterFile != null && !moThreeGPPAttrMap.containsKey(mo)){
+            return;
+        }
+        
         String paramNames = "FileName,varDateTime";
         String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
+        Stack<String> ignoreInParameterFile = new Stack();
+        
         //Parent IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
             String parentMO = xmlTagStack.get(i).toString();
@@ -958,6 +1005,8 @@ public class BodaBulkCMParser {
                 String pName = parentMO + "_" + meMap.getKey();
                 paramNames = paramNames + "," + pName;
                 paramValues = paramValues + "," + toCSVFormat(meMap.getValue());
+                
+                ignoreInParameterFile.push(pName);
             }
         }
         
@@ -974,6 +1023,14 @@ public class BodaBulkCMParser {
 
               for(int i =0; i < a3GPPAtrr.size();i++){
                   String aAttr = (String)a3GPPAtrr.get(i);
+                  
+                  //Skip parameters listed in the parameter file that are in the xmlTagList already
+                  if(ignoreInParameterFile.contains(aAttr)) continue;
+                  
+                  //Skip fileName, and dateTime in the parameter file as they are added by default
+                  if(aAttr.toLowerCase().equals("filename") || 
+                          aAttr.toLowerCase().equals("vardatetime") ) continue;
+                  
                   String aValue= "";
 
                   if( current3GPPAttrs != null && current3GPPAttrs.containsKey(aAttr)){
@@ -1012,10 +1069,20 @@ public class BodaBulkCMParser {
      * @since 1.0.0
      */
     public void processVendorAttributes() {
+        
+        //Skip if the mo is not in the parameterFile
+        if( parameterFile != null && !moColumns.containsKey(vsDataType)){
+            return;
+        }
+        
+        //System.out.println("vsDataType:" + vsDataType);
+                
         String paramNames = "FileName,varDateTime";
         String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
         Map<String,String> parentIdValues = new LinkedHashMap<String, String>();
+        
+        //System.out.println("xmlTagStack.size:" + xmlTagStack.size());
         
         //Parent MO IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
@@ -1050,6 +1117,7 @@ public class BodaBulkCMParser {
             }
         }
 
+        //System.out.println("moColumnsParentIds.get(vsDataType):" + moColumnsParentIds.get(vsDataType) );
         
         Stack parentIds = moColumnsParentIds.get(vsDataType);
         for (int idx = 0; idx < parentIds.size(); idx++) {
@@ -1069,9 +1137,17 @@ public class BodaBulkCMParser {
         Stack columns = new Stack();
 
         columns = moColumns.get(vsDataType);
+        
+
         //Iterate through the columns already collected
         for (int i = 0; i < columns.size(); i++) {
             String pName = columns.get(i).toString();
+            
+            //Skip parent parameters/ parentIds listed in the parameter file
+            if( parameterFile != null && moColumnsParentIds.get(vsDataType).contains(pName)) continue;
+            
+            if(pName.equals("FileName") || pName.equals("varDateTime") ) continue;
+            
             String pValue = "";
             if (vsDataTypeStack.containsKey(pName)) {
                 pValue = toCSVFormat(vsDataTypeStack.get(pName));
@@ -1109,8 +1185,12 @@ public class BodaBulkCMParser {
      */
     private void updateThreeGPPAttrMap(){
         if( xmlTagStack == null || xmlTagStack.isEmpty() ) return;
+
         
         String mo = xmlTagStack.peek().toString();
+        
+        //Skil 3GPP MO if it is not in the parameter file
+        if(parameterFile != null && !moThreeGPPAttrMap.containsKey(mo) ) return;
         
         //Hold the current 3GPP attributes
         HashMap<String, String> tgppAttrs = null;
@@ -1118,7 +1198,7 @@ public class BodaBulkCMParser {
         Stack attrs =  new Stack();
         
         //Initialize if the MO does not exist
-        if(!moThreeGPPAttrMap.containsKey(mo)){
+        if(!moThreeGPPAttrMap.containsKey(mo) ){
             moThreeGPPAttrMap.put(mo, new Stack());
         }
         
@@ -1152,7 +1232,11 @@ public class BodaBulkCMParser {
      * Collect parameters for vendor specific mo data
      */
     private void collectVendorMOColumns(){
-        if (!moColumns.containsKey(vsDataType)) {
+        
+        //If MO is not in the parameter list, then don't continue
+        if(parameterFile != null && !moColumns.containsKey(vsDataType)) return;
+        
+        if (!moColumns.containsKey(vsDataType) ) {
             moColumns.put(vsDataType, new Stack());
             moColumnsParentIds.put(vsDataType, new Stack()); //Holds parent element IDs
         }
@@ -1160,18 +1244,21 @@ public class BodaBulkCMParser {
         Stack s = moColumns.get(vsDataType); 
         Stack parentIDStack = moColumnsParentIds.get(vsDataType); 
 
-        //Get vendor specific attributes
-        Iterator<Map.Entry<String, String>> iter
-                = vsDataTypeStack.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<String, String> me = iter.next();
-            String parameter = me.getKey();
-            if( !s.contains( parameter ) ){
-                s.push(parameter);
+        //Only update hte moColumns list if the parameterFile is not set
+        //else use the list provided in the parameterFile
+        if( parameterFile == null ){
+            //Get vendor specific attributes
+            Iterator<Map.Entry<String, String>> iter
+                    = vsDataTypeStack.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String, String> me = iter.next();
+                String parameter = me.getKey();
+                if( !s.contains( parameter ) ){
+                    s.push(parameter);
+                }
             }
+            moColumns.replace(vsDataType, s);
         }
-        moColumns.replace(vsDataType, s);
-        
         //
         //Parent IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
@@ -1263,7 +1350,7 @@ public class BodaBulkCMParser {
     public void showHelp() {
         System.out.println("boda-bulkcmparser "+ VERSION +" Copyright (c) 2017 Bodastage(http://www.bodastage.com)");
         System.out.println("Parses 3GPP Bulk CM XML to csv.");
-        System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml|Directory> <outputDirectory>");
+        System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml|Directory> <outputDirectory> [parameter.conf]");
     }
 
     /**
@@ -1353,5 +1440,4 @@ public class BodaBulkCMParser {
     private void setFileName(String filename) {
         this.dataFile = filename;
     }
-
 }
