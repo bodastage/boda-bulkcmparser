@@ -37,7 +37,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final String VERSION = "1.3.1";
+    final String VERSION = "1.3.2";
     
     /**
      * Tracks XML elements.
@@ -776,7 +776,7 @@ public class BodaBulkCMParser {
         if (qName.equals("attributes")) {
             attrMarker = false;
             
-            if(parserState == ParserStates.EXTRACTING_PARAMETERS && vsDataType == null){
+            if(parserState == ParserStates.EXTRACTING_PARAMETERS && vsDataType == null ){
                 updateThreeGPPAttrMap();
             }
             return;
@@ -1219,7 +1219,11 @@ public class BodaBulkCMParser {
             while (iter.hasNext()) {
                 Map.Entry<String, String> me = iter.next();
                 String parameter = me.getKey();
-                if( !attrs.contains( parameter ) ){
+                
+                //Only add missing parameter is a paramterFile was not specified.
+                //The parameter file parameter list is our only interest in this 
+                //case
+                if( !attrs.contains( parameter ) && parameterFile == null ){
                     attrs.push(parameter);
                 }
             }
@@ -1348,7 +1352,7 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      */
     public void showHelp() {
-        System.out.println("boda-bulkcmparser "+ VERSION +" Copyright (c) 2017 Bodastage(http://www.bodastage.com)");
+        System.out.println("boda-bulkcmparser "+ VERSION +" Copyright (c) 2018 Bodastage(http://www.bodastage.com)");
         System.out.println("Parses 3GPP Bulk CM XML to csv.");
         System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml|Directory> <outputDirectory> [parameter.conf]");
     }
