@@ -17,3 +17,4 @@ manifest.mf
 build.xml
 dist/README.TXT
 /target/
+nbactions.xml

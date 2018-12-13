@@ -28,6 +28,13 @@ import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 
 public class BodaBulkCMParser {
 
@@ -37,7 +44,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final String VERSION = "1.3.2";
+    final static String VERSION = "2.0.0";
     
     /**
      * Tracks XML elements.
@@ -299,9 +306,28 @@ public class BodaBulkCMParser {
     private int parserState = ParserStates.EXTRACTING_PARAMETERS;
 
     /**
+     * Extract managed objects and their parameters
+     */
+    private Boolean extractParametersOnly = false;
+    
+    /**
+     * Add meta fields to each MO.
+     * FILENAME,DATETIME,NE_TECHNOLOGY,NE_VENDOR,NE_VERSION,NE_TYPE 
+     */
+    private Boolean extractMetaFields = false;
+    
+    /**
      * parameter selection file
      */
     private String parameterFile = null;
+    
+    public void setExtractParametersOnly(Boolean bool){
+        extractParametersOnly = bool;
+    }
+    
+    public void setExtractMetaFields(Boolean bool){
+        extractMetaFields = bool;
+    }
     
   /**
      * Extract parameter list from  parameter file
@@ -375,53 +401,148 @@ public class BodaBulkCMParser {
      */
     public static void main(String[] args) {
 
+       //Define
+       Options options = new Options();
+       CommandLine cmd = null;
+       String outputDirectory = null;   
+       String inputFile = null;
+       String parameterConfigFile = null;
+       Boolean onlyExtractParameters = false;
+       Boolean showHelpMessage = false;
+       Boolean showVersion = false;
+       Boolean attachMetaFields = false; //Attach mattachMetaFields FILENAME,DATETIME,NE_TECHNOLOGY,NE_VENDOR,NE_VERSION,NE_TYPE
+       
+       try{ 
+            options.addOption( "p", "extract-parameters", false, "extract only the managed objects and parameters" );
+            options.addOption( "v", "version", false, "display version" );
+            options.addOption( "m", "meta-fields", false, "add meta fields to extracted parameters. FILENAME,DATETIME" );
+            options.addOption( Option.builder("i")
+                    .longOpt( "input-file" )
+                    .desc( "input file or directory name")
+                    .hasArg()
+                    .argName( "INPUT_FILE" ).build());
+            options.addOption(Option.builder("o")
+                    .longOpt( "output-directory" )
+                    .desc( "output directory name")
+                    .hasArg()
+                    .argName( "OUTPUT_DIRECTORY" ).build());
+            options.addOption(Option.builder("c")
+                    .longOpt( "parameter-config" )
+                    .desc( "parameter configuration file")
+                    .hasArg()
+                    .argName( "PARAMETER_CONFIG" ).build() );
+            options.addOption( "h", "help", false, "show help" );
+            
+            //Parse command line arguments
+            CommandLineParser parser = new DefaultParser();
+            cmd = parser.parse( options, args);
+
+            if( cmd.hasOption("h")){
+                showHelpMessage = true;
+            }
+
+            if( cmd.hasOption("v")){
+                showVersion = true;
+            }
+            
+            if(cmd.hasOption('o')){
+                outputDirectory = cmd.getOptionValue("o"); 
+            }
+            
+            if(cmd.hasOption('i')){
+                inputFile = cmd.getOptionValue("i"); 
+            }
+            
+            if(cmd.hasOption('c')){
+                parameterConfigFile = cmd.getOptionValue("c"); 
+            }
+            
+            if(cmd.hasOption('p')){
+                onlyExtractParameters  = true;
+            }
+            
+            if(cmd.hasOption('m')){
+                attachMetaFields  = true;
+            }
+            
+       }catch(IllegalArgumentException e){
+           
+       } catch (ParseException ex) {
+//            java.util.logging.Logger.getLogger(HuaweiCMObjectParser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       
+       
         try{
             
-         BodaBulkCMParser theParser = new BodaBulkCMParser();
-            
-        //show help
-        if( (args.length != 2 && args.length != 3) || (args.length == 1 && args[0] == "-h")){
-            theParser.showHelp();
-            System.exit(1);
-        }
-        
-        String outputDirectory = args[1];      
-        
-        //Confirm that the output directory is a directory and has write 
-        //privileges
-        File fOutputDir = new File(outputDirectory);
-        if (!fOutputDir.isDirectory()) {
-            System.err.println("ERROR: The specified output directory is not a directory!.");
-            System.exit(1);
-        }
-
-        if (!fOutputDir.canWrite()) {
-            System.err.println("ERROR: Cannot write to output directory!");
-            System.exit(1);
-        }
-
-        //Get bulk CM XML file to parse.
-        //bulkCMXMLFile = ;
-        //outputDirectory = args[1];
-
-        BodaBulkCMParser cmParser = new BodaBulkCMParser();
-        
-        if(  args.length == 3  ){
-            File f = new File(args[2]);
-            if(f.isFile()){
-               cmParser.setParameterFile(args[2]);
-               cmParser.getParametersToExtract(args[2]);
+            if(showVersion == true ){
+                System.out.println(VERSION);
+                System.out.println("Copyright (c) 2018 Bodastage Solutions(http://www.bodastage.com)");
+                System.exit(0);
             }
-        }
+            
+            //show help
+            if( showHelpMessage == true || 
+                inputFile == null || 
+                ( outputDirectory == null && onlyExtractParameters == false) ){
+                     HelpFormatter formatter = new HelpFormatter();
+                     String header = "Parses BulkCM configuration data file XML to csv\n\n";
+                     String footer = "\n";
+                     footer += "Examples: \n";
+                     footer += "java -jar boda-bulkcmparser.jar -i Gexport_Dump.xml -o out_folder\n";
+                     footer += "java -jar boda-bulkcmparser.jar -i input_folder -o out_folder\n";
+                     footer += "java -jar boda-bulkcmparser.jar -i input_folder -p\n";
+                     footer += "java -jar boda-bulkcmparser.jar -i input_folder -p -m\n";
+                     footer += "\nCopyright (c) 2018 Bodastage Solutions(http://www.bodastage.com)";
+                     formatter.printHelp( "java -jar boda-bulkcmparser.jar", header, options, footer );
+                     System.exit(0);
+            }
         
-        cmParser.setDataSource(args[0]);
-        cmParser.setOutputDirectory(outputDirectory);
-        cmParser.parse();
+            //Confirm that the output directory is a directory and has write 
+            //privileges
+            if(outputDirectory != null ){
+                File fOutputDir = new File(outputDirectory);
+                if (!fOutputDir.isDirectory()) {
+                    System.err.println("ERROR: The specified output directory is not a directory!.");
+                    System.exit(1);
+                }
+
+                if (!fOutputDir.canWrite()) {
+                    System.err.println("ERROR: Cannot write to output directory!");
+                    System.exit(1);
+                }
+            }
+            
+            
+
+            //Get parser instance
+            BodaBulkCMParser cmParser = new BodaBulkCMParser();
+
+
+            if(onlyExtractParameters == true ){
+                cmParser.setExtractParametersOnly(true);
+            }
+            
+            if( attachMetaFields == true ){
+                cmParser.setExtractMetaFields(true);
+            }
+            
+            if(  parameterConfigFile != null ){
+                File f = new File(parameterConfigFile);
+                if(f.isFile()){
+                    cmParser.setParameterFile(parameterConfigFile);
+                    cmParser.getParametersToExtract(parameterConfigFile);
+                    cmParser.parserState = ParserStates.EXTRACTING_VALUES;
+                }
+            }
+            
+            cmParser.setDataSource(inputFile);
+            if(outputDirectory != null ) cmParser.setOutputDirectory(outputDirectory);
+            
+            cmParser.parse();
         }catch(Exception e){
             System.out.println(e.getMessage());
             System.exit(1);
         }
-
     }
 
     /**
@@ -980,7 +1101,7 @@ public class BodaBulkCMParser {
             return;
         }
         
-        String paramNames = "FileName,varDateTime";
+        String paramNames = "FILENAME,DATETIME";
         String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
         Stack<String> ignoreInParameterFile = new Stack();
@@ -1077,7 +1198,7 @@ public class BodaBulkCMParser {
         
         //System.out.println("vsDataType:" + vsDataType);
                 
-        String paramNames = "FileName,varDateTime";
+        String paramNames = "FILENAME,DATETIME";
         String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
         Map<String,String> parentIdValues = new LinkedHashMap<String, String>();
