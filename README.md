@@ -6,7 +6,26 @@ XML to csv parser for 3GPP Bulk CM data files as defined by ETSI TS 132 615.
 The parser will convert from XML to csv any XML file that is complaint with TS 132 615 such as Ericsson and ZTE. The parser creates a separate csv file for each Managed Object in the XML file.
 
 # Usage
-java -jar  bulkcmparser.jar bulkcm.xml outputDirectory
+```
+usage: java -jar boda-bulkcmparser.jar
+Parses BulkCM configuration data file XML to csv
+
+ -c,--parameter-config <PARAMETER_CONFIG>   parameter configuration file
+ -h,--help                                  show help
+ -i,--input-file <INPUT_FILE>               input file or directory name
+ -m,--meta-fields                           add meta fields to extracted
+                                            parameters. FILENAME,DATETIME
+ -o,--output-directory <OUTPUT_DIRECTORY>   output directory name
+ -v,--version                               display version
+
+Examples:
+java -jar boda-bulkcmparser.jar -i bulkcm.xml -o out_folder
+java -jar boda-bulkcmparser.jar -i input_folder -o out_folder
+java -jar boda-bulkcmparser.jar -i input_folder -p
+java -jar boda-bulkcmparser.jar -i input_folder -p -m
+
+Copyright (c) 2018 Bodastage Solutions(http://www.bodastage.com)
+``
 
 # Download and installation
 The lastest compiled jar file is availabled in the dist directory or get it [here](https://github.com/bodastage/boda-bulkcmparser/blob/master/dist/boda-bulkcmparser.jar?raw=true).

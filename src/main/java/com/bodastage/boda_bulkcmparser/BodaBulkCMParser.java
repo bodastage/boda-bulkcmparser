@@ -488,7 +488,7 @@ public class BodaBulkCMParser {
                      String header = "Parses BulkCM configuration data file XML to csv\n\n";
                      String footer = "\n";
                      footer += "Examples: \n";
-                     footer += "java -jar boda-bulkcmparser.jar -i Gexport_Dump.xml -o out_folder\n";
+                     footer += "java -jar boda-bulkcmparser.jar -i bulkcm_dump.xml -o out_folder\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -o out_folder\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p -m\n";
