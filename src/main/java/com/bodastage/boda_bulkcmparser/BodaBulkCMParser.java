@@ -47,7 +47,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.0.2";
+    final static String VERSION = "2.0.3";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -1410,12 +1410,14 @@ public class BodaBulkCMParser {
     }
     
     /**
-     * Collect parameters for vendor specific mo data
+     * Collect parameters for vendor specific MO data
      */
     private void collectVendorMOColumns(){
         
         //If MO is not in the parameter list, then don't continue
         if(parameterFile != null && !moColumns.containsKey(vsDataType)) return;
+        
+        
         
         if (!moColumns.containsKey(vsDataType) ) {
             moColumns.put(vsDataType, new Stack());
@@ -1425,6 +1427,45 @@ public class BodaBulkCMParser {
         Stack s = moColumns.get(vsDataType); 
         Stack parentIDStack = moColumnsParentIds.get(vsDataType); 
 
+        //
+        //Parent IDs
+        for (int i = 0; i < xmlTagStack.size(); i++) {
+            String parentMO = xmlTagStack.get(i).toString();
+
+            //If the parent tag is VsDataContainer, look for the 
+            //vendor specific MO in the vsDataContainer-to-vsDataType map.
+            if (parentMO.startsWith("VsDataContainer")) {
+                parentMO = vsDataContainerTypeMap.get(parentMO);
+            }
+            
+            //The depth at each xml tag index is  index+1 
+            int depthKey = i + 1;
+
+            //Iterate through the XML attribute tags for the element.
+            if (xmlAttrStack.get(depthKey) == null) {
+                continue; //Skip null values
+            }
+
+            Iterator<Map.Entry<String, String>> mIter
+                    = xmlAttrStack.get(depthKey).entrySet().iterator();
+
+            while (mIter.hasNext()) {
+                Map.Entry<String, String> meMap = mIter.next();
+                //String pName = meMap.getKey();
+                String pName = parentMO + "_" + meMap.getKey();
+                
+                if( parentIDStack.search(pName ) < 0 ){
+                    parentIDStack.push(pName);
+                }
+                
+                if( parameterFile == null && !s.contains(pName) ){
+                    s.push(pName);
+                }
+            }
+        }
+
+        moColumnsParentIds.replace(vsDataType, parentIDStack);
+        
         //Only update hte moColumns list if the parameterFile is not set
         //else use the list provided in the parameterFile
         if( parameterFile == null ){
@@ -1440,6 +1481,7 @@ public class BodaBulkCMParser {
             }
             moColumns.replace(vsDataType, s);
         }
+        
         //
         //Parent IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
