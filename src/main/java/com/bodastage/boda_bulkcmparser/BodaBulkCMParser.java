@@ -47,7 +47,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.0.3";
+    final static String VERSION = "2.0.4";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -335,6 +335,44 @@ public class BodaBulkCMParser {
         extractMetaFields = bool;
     }
     
+    /**
+     * Get the date 
+     * @param inputFilename 
+     */
+    public void getDateTime(String inputFilename){
+        try{
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+
+        XMLEventReader eventReader = factory.createXMLEventReader(
+                new FileReader(inputFilename));
+        baseFileName = bulkCMXMLFileBasename =  getFileBasename(inputFilename);
+        
+        while (eventReader.hasNext()) {
+            XMLEvent event = eventReader.nextEvent();
+            switch (event.getEventType()) {
+                case XMLStreamConstants.START_ELEMENT:
+                    StartElement startElement = event.asStartElement();
+                    String qName = startElement.getName().getLocalPart();
+                    Iterator<Attribute> attributes = startElement.getAttributes();
+                    if(qName.equals("fileFooter")){
+                        while (attributes.hasNext()) {
+                            Attribute attribute = attributes.next();
+                            if (attribute.getName().toString().equals("dateTime")) {
+                                dateTime = attribute.getValue();
+                            }
+                        }
+                    }
+            
+                    break;
+            }
+        
+            
+        }
+        }catch(Exception e){
+            
+        }
+    }
+    
   /**
      * Extract parameter list from  parameter file
      * 
@@ -616,7 +654,15 @@ public class BodaBulkCMParser {
             }else{
                 System.out.print("Parsing " + this.baseFileName + "...");
             }
+            
+            //Get date time 
+            if(parameterFile != null){
+                getDateTime(this.dataSource);
+            }
+            
+            //Parse file
             this.parseFile(this.dataSource);
+            
             if( parserState == ParserStates.EXTRACTING_PARAMETERS){
                  System.out.println("Done.");
             }else{
@@ -642,8 +688,14 @@ public class BodaBulkCMParser {
                         System.out.print("Parsing " + this.baseFileName + "...");
                     }
                     
-                    //Parse
+                    //Get date time 
+                    if(parameterFile != null){
+                        getDateTime(f.getAbsolutePath());
+                    }
+                    
+                    //Parse dump file 
                     this.parseFile(f.getAbsolutePath());
+                    
                     if( parserState == ParserStates.EXTRACTING_PARAMETERS){
                          System.out.println("Done.");
                     }else{
