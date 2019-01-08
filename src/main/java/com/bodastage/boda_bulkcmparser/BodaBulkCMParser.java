@@ -47,7 +47,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.0.4";
+    final static String VERSION = "2.0.5";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -520,7 +520,7 @@ public class BodaBulkCMParser {
             
             if(showVersion == true ){
                 System.out.println(VERSION);
-                System.out.println("Copyright (c) 2018 Bodastage Solutions(http://www.bodastage.com)");
+                System.out.println("Copyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)");
                 System.exit(0);
             }
             
@@ -536,7 +536,7 @@ public class BodaBulkCMParser {
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -o out_folder\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p -m\n";
-                     footer += "\nCopyright (c) 2018 Bodastage Solutions(http://www.bodastage.com)";
+                     footer += "\nCopyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)";
                      formatter.printHelp( "java -jar boda-bulkcmparser.jar", header, options, footer );
                      System.exit(0);
             }
@@ -605,15 +605,7 @@ public class BodaBulkCMParser {
         }
 
         //Reset variables
-            vsDataType = null;
-            vsDataTypeStack.clear();
-            vsDataTypeRlStack.clear();
-            xmlAttrStack.clear();
-            xmlTagStack.clear();
-            startElementTag = null; 
-            startElementTagPrefix = "";
-            attrMarker = false;
-            depth = 0;
+        resetVariables();
             
         //Extracting values
         if (parserState == ParserStates.EXTRACTING_VALUES) {
@@ -626,6 +618,22 @@ public class BodaBulkCMParser {
         printExecutionTime();
     }
 
+    /**
+     * Reset parser variables before next file
+     */
+    public void resetVariables(){
+        //Reset variables
+            vsDataType = null;
+            vsDataTypeStack.clear();
+            vsDataTypeRlStack.clear();
+            xmlAttrStack.clear();
+            xmlTagStack.clear();
+            startElementTag = null; 
+            startElementTagPrefix = "";
+            attrMarker = false;
+            depth = 0;
+    }
+    
     /**
      * Determines if the source data file is a regular file or a directory and 
      * parses it accordingly
@@ -706,6 +714,9 @@ public class BodaBulkCMParser {
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                     System.out.println("Skipping file: " + this.baseFileName + "\n");
+                    
+                    //Reset variables if a file is skipped
+                    resetVariables();
                 }
             }
         }
@@ -1506,7 +1517,7 @@ public class BodaBulkCMParser {
                 //String pName = meMap.getKey();
                 String pName = parentMO + "_" + meMap.getKey();
                 
-                if( parentIDStack.search(pName ) < 0 ){
+                if( parentIDStack.search(pName) < 0 ){
                     parentIDStack.push(pName);
                 }
                 
@@ -1536,38 +1547,38 @@ public class BodaBulkCMParser {
         
         //
         //Parent IDs
-        for (int i = 0; i < xmlTagStack.size(); i++) {
-            String parentMO = xmlTagStack.get(i).toString();
-
-            //If the parent tag is VsDataContainer, look for the 
-            //vendor specific MO in the vsDataContainer-to-vsDataType map.
-            if (parentMO.startsWith("VsDataContainer")) {
-                parentMO = vsDataContainerTypeMap.get(parentMO);
-            }
-            
-            //The depth at each xml tag index is  index+1 
-            int depthKey = i + 1;
-
-            //Iterate through the XML attribute tags for the element.
-            if (xmlAttrStack.get(depthKey) == null) {
-                continue; //Skip null values
-            }
-
-            Iterator<Map.Entry<String, String>> mIter
-                    = xmlAttrStack.get(depthKey).entrySet().iterator();
-
-            while (mIter.hasNext()) {
-                Map.Entry<String, String> meMap = mIter.next();
-                //String pName = meMap.getKey();
-                String pName = parentMO + "_" + meMap.getKey();
-                
-                if( parentIDStack.search(pName ) < 0 ){
-                    parentIDStack.push(pName);
-                }
-            }
-        }
-
-        moColumnsParentIds.replace(vsDataType, parentIDStack);
+//        for (int i = 0; i < xmlTagStack.size(); i++) {
+//            String parentMO = xmlTagStack.get(i).toString();
+//
+//            //If the parent tag is VsDataContainer, look for the 
+//            //vendor specific MO in the vsDataContainer-to-vsDataType map.
+//            if (parentMO.startsWith("VsDataContainer")) {
+//                parentMO = vsDataContainerTypeMap.get(parentMO);
+//            }
+//            
+//            //The depth at each xml tag index is  index+1 
+//            int depthKey = i + 1;
+//
+//            //Iterate through the XML attribute tags for the element.
+//            if (xmlAttrStack.get(depthKey) == null) {
+//                continue; //Skip null values
+//            }
+//
+//            Iterator<Map.Entry<String, String>> mIter
+//                    = xmlAttrStack.get(depthKey).entrySet().iterator();
+//
+//            while (mIter.hasNext()) {
+//                Map.Entry<String, String> meMap = mIter.next();
+//                //String pName = meMap.getKey();
+//                String pName = parentMO + "_" + meMap.getKey();
+//                
+//                if( parentIDStack.search(pName ) < 0 ){
+//                    parentIDStack.push(pName);
+//                }
+//            }
+//        }
+//
+//        moColumnsParentIds.replace(vsDataType, parentIDStack);
 
     }
 
