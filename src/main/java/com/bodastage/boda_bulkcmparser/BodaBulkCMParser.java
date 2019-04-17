@@ -47,7 +47,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.0.5";
+    final static String VERSION = "2.0.6";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -845,6 +845,22 @@ public class BodaBulkCMParser {
 
         //E1.2
         if (null != vsDataType) {
+            
+            //Handle parameters with children
+            //Update vsDataTypeStack and vsDataTypeRlStack
+            if(vsDataTypeRlStack.size() > 0){
+                String parentParameter = vsDataTypeRlStack.get(0).toString();
+                String childParameter = qName;
+                String param = parentParameter + "_" + childParameter;
+                if(!vsDataTypeStack.containsKey(param)){
+                    vsDataTypeStack.put(param, null);
+                }
+                vsDataTypeRlStack.push(qName);
+                        
+                return;
+            }
+            
+            //Handle parameters with no children
             if (!vsDataTypeStack.containsKey(qName)) {
                 vsDataTypeStack.put(qName, null);
                 vsDataTypeRlStack.push(qName);
@@ -992,7 +1008,7 @@ public class BodaBulkCMParser {
         if (vsDataType != null && attrMarker == true) {//We are processing vsData<DataType> attributes
             String newTag = qName;
             String newValue = tagData;
-
+            
             //Handle attributes with children
             if (parentChildParameters.containsKey(qName)) {//End of parent tag
 
@@ -1021,9 +1037,6 @@ public class BodaBulkCMParser {
 
                 //Store the parent and it's child
                 parentChildParameters.put(parentTag, qName);
-
-                //Remove this tag from the tag stack.
-                vsDataTypeStack.remove(qName);
 
             }
 
@@ -1479,8 +1492,6 @@ public class BodaBulkCMParser {
         
         //If MO is not in the parameter list, then don't continue
         if(parameterFile != null && !moColumns.containsKey(vsDataType)) return;
-        
-        
         
         if (!moColumns.containsKey(vsDataType) ) {
             moColumns.put(vsDataType, new Stack());

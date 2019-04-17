@@ -4,8 +4,8 @@
   <groupId>com.bodastate.boda_bulkcmparser</groupId>
   <artifactId>boda-bulkcmparser</artifactId>
   <packaging>jar</packaging>
-  <version>2.0.5</version>
-  <name>boda-bulkcmparser</name>
+  <version>2.0.6</version>
+  <name>boda-bulkcmparser-pr</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
