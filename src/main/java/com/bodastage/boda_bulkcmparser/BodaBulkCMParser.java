@@ -47,7 +47,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.0.6";
+    final static String VERSION = "2.0.7";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -327,6 +327,22 @@ public class BodaBulkCMParser {
      */
     private String parameterFile = null;
     
+    
+    /**
+     * This is used to mark when processing is still inside the children of a 
+     * a parameter - child scenario. It is useful when one of the children has 
+     * the same name as the parent.
+     *  <moname> 
+     *      <chid1>someValue</child1>
+     *      ...
+     *      <moname>someValue</moname>
+     *      ...
+     *      <child/>someValue<childN>
+     * </moName>
+     * 
+     */
+    private Boolean inParentChildTag = false;
+   
     public void setExtractParametersOnly(Boolean bool){
         extractParametersOnly = bool;
     }
@@ -606,7 +622,7 @@ public class BodaBulkCMParser {
 
         //Reset variables
         resetVariables();
-            
+        
         //Extracting values
         if (parserState == ParserStates.EXTRACTING_VALUES) {
             processFileOrDirectory();
@@ -797,7 +813,7 @@ public class BodaBulkCMParser {
 
         startElementTag = qName;
         startElementTagPrefix = prefix;
-
+        
         Iterator<Attribute> attributes = startElement.getAttributes();
 
         if(qName.equals("fileFooter") && ParserStates.EXTRACTING_PARAMETERS == parserState){
@@ -962,12 +978,11 @@ public class BodaBulkCMParser {
         EndElement endElement = xmlEvent.asEndElement();
         String prefix = endElement.getName().getPrefix();
         String qName = endElement.getName().getLocalPart();
-
+        
         startElementTag = "";
 
         //E3:1 </xn:VsDataContainer>
         if (qName.equalsIgnoreCase("VsDataContainer")) {
-
             String vsDCTag = "VsDataContainer_" + vsDCDepth;
             xmlTagStack.pop();
             xmlAttrStack.remove(depth);
@@ -977,7 +992,8 @@ public class BodaBulkCMParser {
             depth--;
             return;
         }
-
+        
+        
         //3.2 </xn:attributes>
         if (qName.equals("attributes")) {
             attrMarker = false;
@@ -1010,7 +1026,8 @@ public class BodaBulkCMParser {
             String newValue = tagData;
             
             //Handle attributes with children
-            if (parentChildParameters.containsKey(qName)) {//End of parent tag
+            //inParentChildTag== false, means we have completed processing the children
+            if (parentChildParameters.containsKey(qName) && inParentChildTag == false) {//End of parent tag
 
                 //Ware at the end of the parent tag so we remove the mapping
                 //as the child values have already been collected in 
@@ -1034,10 +1051,13 @@ public class BodaBulkCMParser {
                 int len = vsDataTypeRlStack.size();
                 String parentTag = vsDataTypeRlStack.get(len - 2).toString();
                 newTag = parentTag + parentChildAttrSeperator + qName;
-
+                inParentChildTag = true;
+                
                 //Store the parent and it's child
                 parentChildParameters.put(parentTag, qName);
 
+            }else{
+                inParentChildTag = false;
             }
 
             //Handle multivalued paramenters
@@ -1645,7 +1665,7 @@ public class BodaBulkCMParser {
      * @version 1.0.0
      */
     public void showHelp() {
-        System.out.println("boda-bulkcmparser "+ VERSION +" Copyright (c) 2018 Bodastage(http://www.bodastage.com)");
+        System.out.println("boda-bulkcmparser "+ VERSION +" Copyright (c) 2019 Bodastage(http://www.bodastage.com)");
         System.out.println("Parses 3GPP Bulk CM XML to csv.");
         System.out.println("Usage: java -jar boda-bulkcmparser.jar <fileToParse.xml|Directory> <outputDirectory> [parameter.conf]");
     }

@@ -24,7 +24,7 @@ java -jar boda-bulkcmparser.jar -i input_folder -o out_folder
 java -jar boda-bulkcmparser.jar -i input_folder -p
 java -jar boda-bulkcmparser.jar -i input_folder -p -m
 
-Copyright (c) 2018 Bodastage Solutions(http://www.bodastage.com)
+Copyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)
 ```
 
 # Download and installation
