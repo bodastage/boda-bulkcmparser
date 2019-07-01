@@ -1,7 +1,15 @@
 package com.bodastage.boda_bulkcmparser;
 
 import com.bodastage.boda_bulkcmparser.bulkcmxml.BulkCmConfigDataFile;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -94,21 +102,68 @@ public class BodaBulkCMParserTest
     /**
      * Run test.
      */
-    public void testApp()
-    {
+//    public void testApp()
+//    {
+//        try {
+//            BodaBulkCMParser parser = new BodaBulkCMParser();
+//            String[] args = { sampleBulkCMFile, System.getProperty("java.io.tmpdir")};
+//            parser.main(args);
+//
+//            for(int i=0; i<expectedFiles.length;i++){
+//                boolean fileExists 
+//                        = new File( expectedFiles[i]).exists();
+//                assertTrue(fileExists);
+//            }
+//
+//        } catch (Exception ex) {
+//            assertTrue(false);
+//        }
+//    }
+    
+    public void testParentChildAttrbutesWithSameName(){
+        ClassLoader classLoader = getClass().getClassLoader();
+        File inFile = new File(classLoader.getResource("bulkcm_parent_child_same_name.xml").getFile());
+        
+        BodaBulkCMParser parser = new BodaBulkCMParser();
+        String inputFile = inFile.getAbsolutePath();
+        
+        System.out.println(inputFile);
+        String outputFolder = System.getProperty("java.io.tmpdir");
+        
+        Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.INFO, "outputFolder:" + outputFolder );
+        
+        String[] args = { "-i", inputFile, "-o", outputFolder};
+        
+        parser.main(args);
+        
+        String expectedResult [] = {
+            "FILENAME,DATETIME,bulkCmConfigDataFile_schemaLocation,SubNetwork_id,SubNetwork_2_id,meContext_id,ManagedElement_id,vsDataSomeMO_id,SomeAttr,SomeAttr_SomeAttrChild1,SomeAttr_SomeAttr",
+            "bulkcm_parent_child_same_name.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,Q0001,,Val1,SomeAttrChildVal"};
+        
         try {
-            BodaBulkCMParser parser = new BodaBulkCMParser();
-            String[] args = { sampleBulkCMFile, System.getProperty("java.io.tmpdir")};
-            parser.main(args);
-
-            for(int i=0; i<expectedFiles.length;i++){
-                boolean fileExists 
-                        = new File( expectedFiles[i]).exists();
-                assertTrue(fileExists);
+            String csvFile = outputFolder + File.separator + "vsDataSomeMO.csv";
+            
+            BufferedReader br = new BufferedReader(new FileReader(csvFile)); 
+            String csvResult [] = new String[2];
+            
+            int i = 0;
+            String st; 
+            while ((st = br.readLine()) != null) {
+                csvResult[i] = st;
+                i++;
             }
-
-        } catch (Exception ex) {
-            assertTrue(false);
+            
+            assertTrue(Arrays.equals(expectedResult, csvResult));
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
+        } catch (IOException ex) {
+            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
         }
+        
+        
+        
     }
 }
