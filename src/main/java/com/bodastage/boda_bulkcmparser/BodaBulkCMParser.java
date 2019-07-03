@@ -47,7 +47,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.0.7";
+    final static String VERSION = "2.0.8";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -975,6 +975,7 @@ public class BodaBulkCMParser {
 
     public void endELementEvent(XMLEvent xmlEvent)
             throws FileNotFoundException, UnsupportedEncodingException {
+        
         EndElement endElement = xmlEvent.asEndElement();
         String prefix = endElement.getName().getPrefix();
         String qName = endElement.getName().getLocalPart();
@@ -1025,6 +1026,11 @@ public class BodaBulkCMParser {
             String newTag = qName;
             String newValue = tagData;
             
+            //Note end of the parent-child
+            if (vsDataTypeRlStack.size() == 1 && inParentChildTag == true ) {
+                inParentChildTag = false;
+            }
+            
             //Handle attributes with children
             //inParentChildTag== false, means we have completed processing the children
             if (parentChildParameters.containsKey(qName) && inParentChildTag == false) {//End of parent tag
@@ -1042,7 +1048,6 @@ public class BodaBulkCMParser {
                 //Remove the parent tag from the stack so that we don't output 
                 //data for it. It's values are taked care of by its children.
                 vsDataTypeStack.remove(qName);
-
                 return;
             }
 
@@ -1056,8 +1061,6 @@ public class BodaBulkCMParser {
                 //Store the parent and it's child
                 parentChildParameters.put(parentTag, qName);
 
-            }else{
-                inParentChildTag = false;
             }
 
             //Handle multivalued paramenters
@@ -1160,6 +1163,9 @@ public class BodaBulkCMParser {
             threeGPPAttrStack.remove(depth);
             depth--;
         }
+        //parentChildParameters.clear();
+
+        
     }
 
     /**

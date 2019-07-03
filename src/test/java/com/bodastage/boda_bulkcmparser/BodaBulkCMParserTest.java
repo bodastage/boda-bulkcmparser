@@ -137,8 +137,8 @@ public class BodaBulkCMParserTest
         parser.main(args);
         
         String expectedResult [] = {
-            "FILENAME,DATETIME,bulkCmConfigDataFile_schemaLocation,SubNetwork_id,SubNetwork_2_id,meContext_id,ManagedElement_id,vsDataSomeMO_id,SomeAttr,SomeAttr_SomeAttrChild1,SomeAttr_SomeAttr",
-            "bulkcm_parent_child_same_name.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,Q0001,,Val1,SomeAttrChildVal"};
+            "FILENAME,DATETIME,bulkCmConfigDataFile_schemaLocation,SubNetwork_id,SubNetwork_2_id,meContext_id,ManagedElement_id,vsDataSomeMO_id,SomeAttr_SomeAttrChild1,SomeAttr_SomeAttr,SomeAttr_SomeAttr2,AnotherAttr_AnotherChild1,AnotherAttr_AnotherAttr",
+            "bulkcm_parent_child_same_name.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,Q0001,Val1,SomeAttrChildVal,SomeAttrChildVal2,1234,777"};
         
         try {
             String csvFile = outputFolder + File.separator + "vsDataSomeMO.csv";
@@ -151,7 +151,10 @@ public class BodaBulkCMParserTest
             while ((st = br.readLine()) != null) {
                 csvResult[i] = st;
                 i++;
+//                Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.INFO, st);
             }
+            
+//            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.INFO, csvResult.toString());
             
             assertTrue(Arrays.equals(expectedResult, csvResult));
             
