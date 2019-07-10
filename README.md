@@ -16,10 +16,13 @@ Parses BulkCM configuration data file XML to csv
  -m,--meta-fields                           add meta fields to extracted
                                             parameters. FILENAME,DATETIME
  -o,--output-directory <OUTPUT_DIRECTORY>   output directory name
+ -p,--extract-parameters                    extract only the managed
+                                            objects and parameters
+ -s,--separate-vsdata                       Separate vendor specific data
  -v,--version                               display version
 
 Examples:
-java -jar boda-bulkcmparser.jar -i bulkcm.xml -o out_folder
+java -jar boda-bulkcmparser.jar -i bulkcm_dump.xml -o out_folder
 java -jar boda-bulkcmparser.jar -i input_folder -o out_folder
 java -jar boda-bulkcmparser.jar -i input_folder -p
 java -jar boda-bulkcmparser.jar -i input_folder -p -m
