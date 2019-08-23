@@ -151,10 +151,8 @@ public class BodaBulkCMParserTest
             while ((st = br.readLine()) != null) {
                 csvResult[i] = st;
                 i++;
-//                Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.INFO, st);
             }
             
-//            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.INFO, csvResult.toString());
             
             assertTrue(Arrays.equals(expectedResult, csvResult));
             
@@ -168,5 +166,100 @@ public class BodaBulkCMParserTest
         
         
         
+    }
+    
+    /**
+     * Test parsing of bulkcm without separating vsData MOs
+     */
+    public void testSeparatingVsData(){
+        ClassLoader classLoader = getClass().getClassLoader();
+        File inFile = new File(classLoader.getResource("bulkcm3.xml").getFile());
+        
+        BodaBulkCMParser parser = new BodaBulkCMParser();
+        String inputFile = inFile.getAbsolutePath();
+        
+        System.out.println(inputFile);
+        String outputFolder = System.getProperty("java.io.tmpdir");
+        
+        Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.INFO, "outputFolder:" + outputFolder );
+        
+        String[] args = { "-i", inputFile, "-o", outputFolder, "-s"};
+        
+        parser.main(args);
+        
+        String expectedResult [] = {
+            "FILENAME,DATETIME,bulkCmConfigDataFile_schemaLocation,SubNetwork_id,SubNetwork_2_id,meContext_id,ManagedElement_id,GsmCell_id,vsGsmCell_id,height,latitude,longitude,bcc,ncc",
+            "bulkcm.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,1A,11,Q0001,0001,9,1,2"};
+        
+        try {
+            String csvFile = outputFolder + File.separator + "GsmCell.csv";
+            
+            BufferedReader br = new BufferedReader(new FileReader(csvFile)); 
+            String csvResult [] = new String[2];
+            
+            int i = 0;
+            String st; 
+            while ((st = br.readLine()) != null) {
+                csvResult[i] = st;
+                i++;
+            }
+            
+            
+            assertTrue(Arrays.equals(expectedResult, csvResult));
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
+        } catch (IOException ex) {
+            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
+        }
+    }
+    
+    /**
+     * Test parsing of bulkcm without separating vsData MOs
+     */
+    public void testNotSeparatingVsData(){
+        ClassLoader classLoader = getClass().getClassLoader();
+        File inFile = new File(classLoader.getResource("bulkcm3.xml").getFile());
+        
+        BodaBulkCMParser parser = new BodaBulkCMParser();
+        String inputFile = inFile.getAbsolutePath();
+        
+        String outputFolder = System.getProperty("java.io.tmpdir");
+        
+        Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.INFO, "outputFolder:" + outputFolder );
+        
+        String[] args = { "-i", inputFile, "-o", outputFolder};
+        
+        parser.main(args);
+        
+        String expectedResult [] = {
+            "FILENAME,DATETIME,bulkCmConfigDataFile_schemaLocation,SubNetwork_id,SubNetwork_2_id,meContext_id,ManagedElement_id,GsmCell_id,vsDataGsmCell_id,height,latitude,longitude,bcc,ncc",
+            "bulkcm.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,A1,11,Q0001,0001,9,1,2"};
+        
+        try {
+            String csvFile = outputFolder + File.separator + "GsmCell.csv";
+            
+            BufferedReader br = new BufferedReader(new FileReader(csvFile)); 
+            String csvResult [] = new String[2];
+            
+            int i = 0;
+            String st; 
+            while ((st = br.readLine()) != null) {
+                csvResult[i] = st;
+                i++;
+            }
+
+            assertTrue(Arrays.equals(expectedResult, csvResult));
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
+        } catch (IOException ex) {
+            Logger.getLogger(BodaBulkCMParserTest.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
+        }
+
     }
 }
