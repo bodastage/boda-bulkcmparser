@@ -583,7 +583,7 @@ public class BodaBulkCMParser {
             
             if(showVersion == true ){
                 System.out.println(VERSION);
-                System.out.println("Copyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)");
+                System.out.println("Copyright (c) 2019 Bodastage Solutions(https://www.bodastage.com)");
                 System.exit(0);
             }
             
@@ -599,7 +599,7 @@ public class BodaBulkCMParser {
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -o out_folder\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p -m\n";
-                     footer += "\nCopyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)";
+                     footer += "\nCopyright (c) 2019 Bodastage Solutions(https://www.bodastage.com)";
                      formatter.printHelp( "java -jar boda-bulkcmparser.jar", header, options, footer );
                      System.exit(0);
             }
@@ -1677,7 +1677,6 @@ public class BodaBulkCMParser {
                 }
             }
             moThreeGPPAttrMap.replace(mo, attrs);
-
         }
     }
     
