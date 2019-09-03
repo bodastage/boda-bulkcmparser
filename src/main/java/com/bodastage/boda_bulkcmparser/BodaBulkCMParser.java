@@ -41,13 +41,12 @@ import org.slf4j.LoggerFactory;
 
 public class BodaBulkCMParser {
 
-    
     /**
      * Current release version 
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.1.0";
+    final static String VERSION = "2.2.0";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -465,6 +464,15 @@ public class BodaBulkCMParser {
     }
     
     /**
+     * Set multi-value separator
+     * 
+     * @since 2.2.0
+     */
+    public void setMultiValueSeparator(String mvSeparator){
+        multiValueSeparetor = mvSeparator;
+    }
+    
+    /**
      * Separate vendor specifiic attributes from 3GPP attributes
      * 
      * @since 2.1.0
@@ -493,6 +501,9 @@ public class BodaBulkCMParser {
        Boolean separateVsData = false; //separaete 3GPP standard attributes and vendor specific attr
        Boolean attachMetaFields = false; //Attach mattachMetaFields FILENAME,DATETIME,NE_TECHNOLOGY,NE_VENDOR,NE_VERSION,NE_TYPE
        
+       //Multi-valued separator 
+       String mvSeparator = ";";
+       
        try{ 
             options.addOption( "p", "extract-parameters", false, "extract only the managed objects and parameters" );
             options.addOption( "v", "version", false, "display version" );
@@ -512,6 +523,11 @@ public class BodaBulkCMParser {
                     .desc( "parameter configuration file")
                     .hasArg()
                     .argName( "PARAMETER_CONFIG" ).build() );
+            options.addOption(Option.builder("d")
+                    .longOpt( "multivalue-separator" )
+                    .desc( "Specify multi value separator. Default is \";\"")
+                    .hasArg()
+                    .argName( "MV_SEPARATOR" ).build() );
             options.addOption( "s", "separate-vsdata", false, "Separate vendor specific data" );
             options.addOption( "h", "help", false, "show help" );
             
@@ -530,6 +546,11 @@ public class BodaBulkCMParser {
             if( cmd.hasOption("v")){
                 showVersion = true;
             }
+            
+            if( cmd.hasOption("d")){
+                mvSeparator = cmd.getOptionValue("d"); 
+            }
+            
             
             if(cmd.hasOption('o')){
                 outputDirectory = cmd.getOptionValue("o"); 
@@ -562,7 +583,7 @@ public class BodaBulkCMParser {
             
             if(showVersion == true ){
                 System.out.println(VERSION);
-                System.out.println("Copyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)");
+                System.out.println("Copyright (c) 2019 Bodastage Solutions(https://www.bodastage.com)");
                 System.exit(0);
             }
             
@@ -578,7 +599,7 @@ public class BodaBulkCMParser {
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -o out_folder\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p\n";
                      footer += "java -jar boda-bulkcmparser.jar -i input_folder -p -m\n";
-                     footer += "\nCopyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)";
+                     footer += "\nCopyright (c) 2019 Bodastage Solutions(https://www.bodastage.com)";
                      formatter.printHelp( "java -jar boda-bulkcmparser.jar", header, options, footer );
                      System.exit(0);
             }
@@ -623,6 +644,7 @@ public class BodaBulkCMParser {
                 }
             }
             
+            cmParser.setMultiValueSeparator(mvSeparator);
             cmParser.setDataSource(inputFile);
             if(outputDirectory != null ) cmParser.setOutputDirectory(outputDirectory);
             
@@ -1655,7 +1677,6 @@ public class BodaBulkCMParser {
                 }
             }
             moThreeGPPAttrMap.replace(mo, attrs);
-
         }
     }
     

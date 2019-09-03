@@ -11,6 +11,8 @@ usage: java -jar boda-bulkcmparser.jar
 Parses BulkCM configuration data file XML to csv
 
  -c,--parameter-config <PARAMETER_CONFIG>   parameter configuration file
+ -d,--multivalue-separator <MV_SEPARATOR>   Specify multi value separator.
+                                            Default is ";"
  -h,--help                                  show help
  -i,--input-file <INPUT_FILE>               input file or directory name
  -m,--meta-fields                           add meta fields to extracted
@@ -27,7 +29,7 @@ java -jar boda-bulkcmparser.jar -i input_folder -o out_folder
 java -jar boda-bulkcmparser.jar -i input_folder -p
 java -jar boda-bulkcmparser.jar -i input_folder -p -m
 
-Copyright (c) 2019 Bodastage Solutions(http://www.bodastage.com)
+Copyright (c) 2019 Bodastage Solutions(https://www.bodastage.com)
 ```
 
 # Download and installation
