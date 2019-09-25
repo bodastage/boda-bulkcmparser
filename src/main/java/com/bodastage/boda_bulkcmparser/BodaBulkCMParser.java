@@ -46,7 +46,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.2.0";
+    final static String VERSION = "2.2.1";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -669,7 +669,7 @@ public class BodaBulkCMParser {
 
             parserState = ParserStates.EXTRACTING_VALUES;
         }
-
+        
         //Reset variables
         resetVariables();
         
@@ -1045,7 +1045,6 @@ public class BodaBulkCMParser {
         }
         
         
-        LOGGER.debug("xmlTagStack:" + xmlTagStack.toString());
         //We are at the end of </attributes> in 3GPP tag
         if(qName.equals("attributes") && !xmlTagStack.peek().toString().startsWith("VsDataContainer")){
             //Collect values for use when separateVsData is false
@@ -1070,8 +1069,6 @@ public class BodaBulkCMParser {
             if(parserState == ParserStates.EXTRACTING_PARAMETERS && vsDataType == null ){
                 updateThreeGPPAttrMap();
             }
-
-
             return;
         }
 
@@ -1387,8 +1384,6 @@ public class BodaBulkCMParser {
     private void saveThreeGPPAttrValues(String mo){
         
         threeGPPAttrValues.clear();
-        LOGGER.debug("moThreeGPPAttrMap:" + moThreeGPPAttrMap.toString());
-        LOGGER.debug("threeGPPAttrStack:" + threeGPPAttrStack.toString());
         
         //Some MOs dont have 3GPP attributes e.g. the fileHeader 
         //and the fileFooter
@@ -1401,10 +1396,6 @@ public class BodaBulkCMParser {
               if (!threeGPPAttrStack.isEmpty() && threeGPPAttrStack.get(depth-2) != null) {
                   current3GPPAttrs = threeGPPAttrStack.get(depth);
               }
-              
-              LOGGER.debug("a3GPPAtrr: " + a3GPPAtrr);
-              LOGGER.debug("current3GPPAttrs:" + current3GPPAttrs);
-              
               
               for(int i =0; i < a3GPPAtrr.size();i++){
                   String aAttr = (String)a3GPPAtrr.get(i);
@@ -1481,9 +1472,6 @@ public class BodaBulkCMParser {
             Iterator<Map.Entry<String, String>> aIter
                     = xmlAttrStack.get(depthKey).entrySet().iterator();
             
-            LOGGER.debug( "depth:" + depth + " parentMO:" + parentMO + 
-                    "  xmlAttrStack:" + xmlAttrStack.toString() + " m:" + m.toString());
-            
             //If we dont't want to separate the vsDataMo from the 3GPP mos
             //strip vsData From the MOs Ids ie.e vsDataSomeMO_id becomes SomeMO_id
             if(separateVendorAttributes == false){
@@ -1500,18 +1488,11 @@ public class BodaBulkCMParser {
 
             }
         }
-
-        //LOGGER.info("parentIdValues:" + parentIdValues.toString());
         
         //Make copy of the columns first
         Stack columns = new Stack();
 
         columns = moColumns.get(vsDataType);
-        
-        //LOGGER.info("vsDataType:" + vsDataType);
-        //LOGGER.info("columns:" + columns.toString());
-        
-        
 
         //Iterate through the columns already collected
         for (int i = 0; i < columns.size(); i++) {
@@ -1549,9 +1530,6 @@ public class BodaBulkCMParser {
             paramNames = paramNames + "," + pName;
             paramValues = paramValues + "," + pValue;
         }    
-        
-
-        //LOGGER.info("threeGPPAttrValues:" + threeGPPAttrValues.toString());
 
         //If we dont't want to separate the vsDataMo from the 3GPP mos
         //strip vsData From the MOs, we must print the 3GPP mos here .
@@ -1559,25 +1537,27 @@ public class BodaBulkCMParser {
         //@TODO: Handle parameter file
         String threeGGPMo = vsDataType.replace("vsData", "");
         if(separateVendorAttributes == false && xmlTagStack.contains(threeGGPMo)){
-            //@TODO: comment 3GPP MO attributes and value
-            Iterator<Map.Entry<String, String>> aIter
-                    = threeGPPAttrValues.entrySet().iterator();
-            while (aIter.hasNext()) {
-                Map.Entry<String, String> meMap = aIter.next();
-                String pValue = toCSVFormat(meMap.getValue());
-                String pName = meMap.getKey();
+            //@TODO: collect  3GPP MO attributes and value
+            Stack _3gppAttr = moThreeGPPAttrMap.get(threeGGPMo);
+            for(int idx =0; idx < _3gppAttr.size(); idx++){
+                String pName = _3gppAttr.get(idx).toString();
+                String pValue= "";
+                
+                //Skip _id fileds
+                if(pName.endsWith("_id")) continue;
+                
+                if(threeGPPAttrValues.containsKey(pName)) pValue = threeGPPAttrValues.get(pName);
                 
                 paramNames = paramNames + "," + pName;
                 paramValues = paramValues + "," + pValue;
             }
-            
         }
         
         String csvFileName = vsDataType;
 
         //Remove vsData if we don't want to separate the 3GPP and vendor attributes
         if(separateVendorAttributes == false) csvFileName = csvFileName.replace("vsData", "");
-
+        
         //Write the parameters and values to files.
         PrintWriter pw = null;
         if (!outputVsDataTypePWMap.containsKey(csvFileName)) {
