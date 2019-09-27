@@ -46,7 +46,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.2.1";
+    final static String VERSION = "2.2.2";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -719,7 +719,7 @@ public class BodaBulkCMParser {
 
         boolean isReadableDirectory = Files.isDirectory(file)
                 & Files.isReadable(file);
-
+        
         if (isRegularExecutableFile) {
             this.setFileName(this.dataSource);
             baseFileName =  getFileBasename(this.dataFile);
@@ -746,7 +746,6 @@ public class BodaBulkCMParser {
         }
 
         if (isReadableDirectory) {
-
             File directory = new File(this.dataSource);
 
             //get all the files from a directory
@@ -778,6 +777,9 @@ public class BodaBulkCMParser {
                     }
                    
                 } catch (Exception e) {
+                    //LOGGER.info("depth:" + depth);
+                    //LOGGER.info("xmlTagStack:" + xmlTagStack.toString());
+                    //LOGGER.info("xmlAttrStack:" + xmlAttrStack.toString());
                     System.out.println(e.getMessage());
                     System.out.println("Skipping file: " + this.baseFileName + "\n");
                     
@@ -993,6 +995,7 @@ public class BodaBulkCMParser {
         //Push 3GPP Defined MOs to the xmlTagStack
         depth++;
         xmlTagStack.push(qName);
+        xmlAttrStack.put(depth, new LinkedHashMap<String, String>());
         while (attributes.hasNext()) {
             Attribute attribute = attributes.next();
 
@@ -1020,7 +1023,6 @@ public class BodaBulkCMParser {
         if (!characters.isWhiteSpace()) {
             tagData = characters.getData();
         }
-
     }
 
     public void endELementEvent(XMLEvent xmlEvent)
@@ -1036,14 +1038,15 @@ public class BodaBulkCMParser {
         if (qName.equalsIgnoreCase("VsDataContainer")) {
             String vsDCTag = "VsDataContainer_" + vsDCDepth;
             xmlTagStack.pop();
-            xmlAttrStack.remove(depth);
-            vsDataContainerTypeMap.remove(vsDCDepth);
-            threeGPPAttrStack.remove(depth);
+            if(xmlAttrStack.containsKey(depth)){
+                xmlAttrStack.remove(depth);
+                threeGPPAttrStack.remove(depth);
+            }
+            if(vsDataContainerTypeMap.containsKey(vsDCDepth)) vsDataContainerTypeMap.remove(vsDCDepth);
             vsDCDepth--;
             depth--;
             return;
         }
-        
         
         //We are at the end of </attributes> in 3GPP tag
         if(qName.equals("attributes") && !xmlTagStack.peek().toString().startsWith("VsDataContainer")){
@@ -1278,8 +1281,6 @@ public class BodaBulkCMParser {
      */
     public void process3GPPAttributes()
             throws FileNotFoundException, UnsupportedEncodingException {
-
-
         
         String mo = xmlTagStack.peek().toString();
             
@@ -1301,7 +1302,7 @@ public class BodaBulkCMParser {
 
             //The depth at each xml tag index is  index+1 
             int depthKey = i + 1;
-
+            
             //Iterate through the XML attribute tags for the element.
             if (xmlAttrStack.get(depthKey) == null) {
                 continue; //Skip null values
@@ -1325,7 +1326,7 @@ public class BodaBulkCMParser {
         if( moThreeGPPAttrMap.get(mo) != null ){
             //Get 3GPP attributes for MO at the current depth
               Stack a3GPPAtrr = moThreeGPPAttrMap.get(mo);
-              Map<String,String> current3GPPAttrs = null;
+              Map<String,String> current3GPPAttrs = new LinkedHashMap<String,String>();
 
               if (!threeGPPAttrStack.isEmpty() && threeGPPAttrStack.get(depth) != null) {
                   current3GPPAttrs = threeGPPAttrStack.get(depth);
@@ -1354,10 +1355,18 @@ public class BodaBulkCMParser {
                   paramNames = paramNames + "," + aAttr;
                   paramValues = paramValues + "," + aValue;
               }
-         }
-  
-
+         }else{
+            //if there are not 3GPP Attributes(ie moThreeGPPAttrMap is empty), collect the XML attributes 
+            Iterator<Map.Entry<String, String>> mIter
+                    = xmlTagValues.entrySet().iterator();
+            while (mIter.hasNext()) {
+                Map.Entry<String, String> meMap = mIter.next();
+                paramNames = paramNames + ","  + meMap.getKey();
+                paramValues = paramValues + ","  + toCSVFormat(meMap.getValue());
+            }
         
+        }
+
         //Write the 3GPP defined MOs to files.
         PrintWriter pw = null;
         if (!output3GPPMOPWMap.containsKey(mo)) {
@@ -1393,9 +1402,13 @@ public class BodaBulkCMParser {
               Map<String,String> current3GPPAttrs = null;
 
             //We are assuming the vsDataSomeMO is an immediate child of SomeMO
-              if (!threeGPPAttrStack.isEmpty() && threeGPPAttrStack.get(depth-2) != null) {
-                  current3GPPAttrs = threeGPPAttrStack.get(depth);
-              }
+//              if (!threeGPPAttrStack.isEmpty() && threeGPPAttrStack.get(depth-2) != null) {
+//                  current3GPPAttrs = threeGPPAttrStack.get(depth);
+//              }
+
+                if(!threeGPPAttrStack.isEmpty() && threeGPPAttrStack.containsKey(depth)){
+                    current3GPPAttrs = threeGPPAttrStack.get(depth);
+                }
               
               for(int i =0; i < a3GPPAtrr.size();i++){
                   String aAttr = (String)a3GPPAtrr.get(i);
@@ -1409,7 +1422,7 @@ public class BodaBulkCMParser {
                           aAttr.toLowerCase().equals("datetime") ) continue;
                   
                   String aValue= "";
-                  
+
                   if( current3GPPAttrs != null && current3GPPAttrs.containsKey(aAttr)){
                       aValue = toCSVFormat(current3GPPAttrs.get(aAttr));
                   }else{
@@ -1417,14 +1430,9 @@ public class BodaBulkCMParser {
                     //a3GPPAtrr i.e. moThreeGPPAttrMap
                       continue;
                     }
-
-                  threeGPPAttrValues.put(aAttr, aValue);
+                    threeGPPAttrValues.put(aAttr, aValue);
               }
-              
-              
-              
          }
- 
     }
     
     /**
@@ -1440,15 +1448,11 @@ public class BodaBulkCMParser {
         if( parameterFile != null && !moColumns.containsKey(vsDataType)){
             return;
         }
-        
-        //System.out.println("vsDataType:" + vsDataType);
                 
         String paramNames = "FILENAME,DATETIME";
         String paramValues = bulkCMXMLFileBasename + "," + dateTime;
 
         Map<String,String> parentIdValues = new LinkedHashMap<String, String>();
-        
-        //System.out.println("xmlTagStack.size:" + xmlTagStack.size());
         
         //Parent MO IDs
         for (int i = 0; i < xmlTagStack.size(); i++) {
@@ -1465,8 +1469,10 @@ public class BodaBulkCMParser {
                 parentMO = vsDataContainerTypeMap.get(parentMO);
             }
 
-            Map<String, String> m = xmlAttrStack.get(depthKey);
-            if (null == m) {
+            Map<String, String> m = null;
+            if(xmlAttrStack.containsKey(depthKey)) m = xmlAttrStack.get(depthKey);
+            
+            if (null == m || m.isEmpty()) {
                 continue;
             }
             Iterator<Map.Entry<String, String>> aIter
@@ -1537,8 +1543,9 @@ public class BodaBulkCMParser {
         //@TODO: Handle parameter file
         String threeGGPMo = vsDataType.replace("vsData", "");
         if(separateVendorAttributes == false && xmlTagStack.contains(threeGGPMo)){
-            //@TODO: collect  3GPP MO attributes and value
-            Stack _3gppAttr = moThreeGPPAttrMap.get(threeGGPMo);
+            Stack _3gppAttr = new Stack();
+            if(!moThreeGPPAttrMap.isEmpty()) moThreeGPPAttrMap.get(threeGGPMo);
+            
             for(int idx =0; idx < _3gppAttr.size(); idx++){
                 String pName = _3gppAttr.get(idx).toString();
                 String pValue= "";

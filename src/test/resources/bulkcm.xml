@@ -48,6 +48,60 @@
 							</bs:vsDataEUtranCellFDD>
 						</xn:attributes>
 					</xn:vsDataContainer>
+ <un:ExternalUtranCell id="xxxxxx">
+                <un:attributes>
+                    <un:rac>0</un:rac>
+                    <un:lac>17734</un:lac>
+                    <un:primaryCpichPower>320</un:primaryCpichPower>
+                    <un:primaryScramblingCode>283</un:primaryScramblingCode>
+                    <un:uarfcnDl>10738</un:uarfcnDl>
+                    <un:uarfcnUl>9788</un:uarfcnUl>
+                    <un:mnc>1</un:mnc>
+                    <un:mcc>214</un:mcc>
+                    <un:rncId>134</un:rncId>
+                    <un:cId>6551</un:cId>
+                    <un:userLabel>xxxxxx</un:userLabel>
+                </un:attributes>
+                <xn:VsDataContainer id="xxxxxx">
+                    <xn:attributes>
+                        <xn:vsDataType>vsDataExternalUtranCell</xn:vsDataType>
+                        <xn:vsDataFormatVersion>EricssonSpecificAttributes.17.09</xn:vsDataFormatVersion>
+                        <es:vsDataExternalUtranCell>
+                            <es:individualOffset>0</es:individualOffset>
+                            <es:maxTxPowerUl>100</es:maxTxPowerUl>
+                            <es:qQualMin>100</es:qQualMin>
+                            <es:qRxLevMin>100</es:qRxLevMin>
+                            <es:agpsEnabled>1</es:agpsEnabled>
+                            <es:cellCapability>
+                                <es:hsdschSupport>0</es:hsdschSupport>
+                                <es:edchSupport>0</es:edchSupport>
+                                <es:edchTti2Support>0</es:edchTti2Support>
+                                <es:enhancedL2Support>0</es:enhancedL2Support>
+                                <es:fdpchSupport>0</es:fdpchSupport>
+                                <es:multiCarrierSupport>0</es:multiCarrierSupport>
+                                <es:cpcSupport>0</es:cpcSupport>
+                                <es:qam64MimoSupport>0</es:qam64MimoSupport>
+                            </es:cellCapability>
+                            <es:transmissionScheme>0</es:transmissionScheme>
+                            <es:parentSystem>SubNetwork=ONRM_RootMo_R,vsDataExternalUtranPlmn=yyyyy</es:parentSystem>
+                            <es:mncLength>2</es:mncLength>
+                            <es:hsAqmCongCtrlSpiSupport>1</es:hsAqmCongCtrlSpiSupport>
+                            <es:hsAqmCongCtrlSpiSupport>2</es:hsAqmCongCtrlSpiSupport>
+                            <es:hsAqmCongCtrlSpiSupport>3</es:hsAqmCongCtrlSpiSupport>
+                            <es:hsAqmCongCtrlSpiSupport>4</es:hsAqmCongCtrlSpiSupport>
+                            <es:hsAqmCongCtrlSpiSupport>7</es:hsAqmCongCtrlSpiSupport>
+                            <es:hsAqmCongCtrlSupport>0</es:hsAqmCongCtrlSupport>
+                            <es:srvccCapability>0</es:srvccCapability>
+                            <es:reportingRange1a>0</es:reportingRange1a>
+                            <es:reportingRange1b>0</es:reportingRange1b>
+                            <es:timeToTrigger1a>-1</es:timeToTrigger1a>
+                            <es:timeToTrigger1b>-1</es:timeToTrigger1b>
+                            <es:rimCapable>0</es:rimCapable>
+                            <es:lbUtranCellOffloadCapacity>1000</es:lbUtranCellOffloadCapacity>
+                        </es:vsDataExternalUtranCell>
+                    </xn:attributes>
+                </xn:VsDataContainer>
+            </un:ExternalUtranCell>
 				</xn:ManagedElement>
 			</xn:meContext>
 		</xn:SubNetwork>
