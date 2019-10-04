@@ -40,13 +40,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BodaBulkCMParser {
+    
+    BodaBulkCMParser(){
+        MoToFileNameMap.put("EutranFreqRelation", "EutranFreqRelation_UtranCell");
+        MoToFileNameMap.put("vsDataEutranFreqRelation", "vsDataEutranFreqRelation_UtranCell");
+    }
 
     /**
      * Current release version 
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.2.2";
+    final static String VERSION = "2.2.3";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -285,6 +290,12 @@ public class BodaBulkCMParser {
      * @since 2.1.0
      */
     Map<String, String> threeGPPAttrValues = new LinkedHashMap<String, String>();
+    
+    /**
+     * This is used to renamed some of the generated csv files to prevent name 
+     * conflict on windows where paths are case insensitive.
+     */
+    Map<String, String> MoToFileNameMap = new LinkedHashMap<String, String>();
     
     /**
      * The file/directory to be parsed.
@@ -1189,7 +1200,6 @@ public class BodaBulkCMParser {
                     cMap.remove(qName);
                     threeGPPAttrStack.put(depth, cMap);
                 }
-
             }
 
             Map<String, String> m = new LinkedHashMap<String, String>();
@@ -1234,7 +1244,6 @@ public class BodaBulkCMParser {
             ){
                 process3GPPAttributes();
             }
-
             
             threeGPPAttrValues.clear();            
             xmlTagStack.pop();
@@ -1370,7 +1379,14 @@ public class BodaBulkCMParser {
         //Write the 3GPP defined MOs to files.
         PrintWriter pw = null;
         if (!output3GPPMOPWMap.containsKey(mo)) {
-            String moFile = outputDirectory + File.separatorChar + mo + ".csv";
+            
+            //Rename conflicting csv files on windows
+            String renamedFileName = mo;
+            if(System.getProperty("os.name").startsWith("Windows")){
+                if(MoToFileNameMap.containsKey(mo)) renamedFileName = MoToFileNameMap.get(mo);
+            }
+            
+            String moFile = outputDirectory + File.separatorChar + renamedFileName + ".csv";
             try {
                 output3GPPMOPWMap.put(mo, new PrintWriter(new File(moFile)));
                 output3GPPMOPWMap.get(mo).println(paramNames);
@@ -1569,7 +1585,12 @@ public class BodaBulkCMParser {
         PrintWriter pw = null;
         if (!outputVsDataTypePWMap.containsKey(csvFileName)) {
             
-            String moFile = outputDirectory + File.separatorChar + csvFileName + ".csv";
+            String renamedFileName = csvFileName;
+            if(System.getProperty("os.name").startsWith("Windows")){
+                if(MoToFileNameMap.containsKey(csvFileName)) renamedFileName = MoToFileNameMap.get(csvFileName);
+            }
+            
+            String moFile = outputDirectory + File.separatorChar + renamedFileName + ".csv";
             try {
                 outputVsDataTypePWMap.put(csvFileName, new PrintWriter(new File(moFile)));
                 outputVsDataTypePWMap.get(csvFileName).println(paramNames);
