@@ -51,7 +51,7 @@ public class BodaBulkCMParser {
      * 
      * Since 1.3.0
      */
-    final static String VERSION = "2.2.3";
+    final static String VERSION = "2.2.4";
     
     
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -1560,7 +1560,7 @@ public class BodaBulkCMParser {
         String threeGGPMo = vsDataType.replace("vsData", "");
         if(separateVendorAttributes == false && xmlTagStack.contains(threeGGPMo)){
             Stack _3gppAttr = new Stack();
-            if(!moThreeGPPAttrMap.isEmpty()) moThreeGPPAttrMap.get(threeGGPMo);
+            if(!moThreeGPPAttrMap.isEmpty()) _3gppAttr = moThreeGPPAttrMap.get(threeGGPMo);
             
             for(int idx =0; idx < _3gppAttr.size(); idx++){
                 String pName = _3gppAttr.get(idx).toString();
