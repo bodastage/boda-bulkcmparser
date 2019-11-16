@@ -32,9 +32,6 @@ java -jar boda-bulkcmparser.jar -i input_folder -p -m
 Copyright (c) 2019 Bodastage Solutions(https://www.bodastage.com)
 ```
 
-# Download and installation
-The lastest compiled jar file is availabled in the dist directory or get it [here](https://github.com/bodastage/boda-bulkcmparser/blob/master/dist/boda-bulkcmparser.jar?raw=true).
-
 # Requirements
 To run the jar file, you need Java version 1.8 and above.
 
