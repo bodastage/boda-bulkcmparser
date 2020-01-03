@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 /**
  * Unit test for boda-bulkcmparser.
  */
-public class BodaBulkCMParserTest 
+public class    BodaBulkCMParserTest
     extends TestCase
 {
     String sampleBulkCMFile;
