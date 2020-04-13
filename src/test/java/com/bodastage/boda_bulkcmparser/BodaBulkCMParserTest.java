@@ -189,7 +189,7 @@ public class    BodaBulkCMParserTest
         
         String expectedResult [] = {
             "FILENAME,DATETIME,bulkCmConfigDataFile_schemaLocation,SubNetwork_id,SubNetwork_2_id,meContext_id,ManagedElement_id,GsmCell_id,vsGsmCell_id,height,latitude,longitude,bcc,ncc",
-            "bulkcm.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,1A,11,Q0001,0001,9,1,2"};
+            "bulkcm3.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,1A,11,Q0001,0001,9,1,2"};
         
         try {
             String csvFile = outputFolder + File.separator + "GsmCell.csv";
@@ -236,10 +236,10 @@ public class    BodaBulkCMParserTest
         
         String expectedResult [] = {
             "FILENAME,DATETIME,bulkCmConfigDataFile_schemaLocation,SubNetwork_id,SubNetwork_2_id,meContext_id,ManagedElement_id,GsmCell_id,vsDataGsmCell_id,height,latitude,longitude,bcc,ncc",
-            "bulkcm.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,A1,11,Q0001,0001,9,1,2"};
+            "bulkcm3.xml,2019-04-16T00:05:00+03:00,http://www.3gpp.org/ftp/specs/archive/32_series/32.615#configData configData.xsd,BS_NRM_ROOT,101,4698,4698,A1,11,Q0001,0001,9,1,2"};
         
         try {
-            String csvFile = outputFolder + File.separator + "GsmCell.csv";
+            String csvFile = outputFolder + File.separator + "bulkcm3.csv";
             
             BufferedReader br = new BufferedReader(new FileReader(csvFile)); 
             String csvResult [] = new String[2];
