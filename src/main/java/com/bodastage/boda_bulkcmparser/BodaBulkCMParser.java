@@ -52,7 +52,7 @@ public class BodaBulkCMParser {
      * <p>
      * Since 1.3.0
      */
-    final static String VERSION = "2.2.6";
+    final static String VERSION = "2.2.7";
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
