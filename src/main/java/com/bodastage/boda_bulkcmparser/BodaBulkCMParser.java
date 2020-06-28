@@ -52,7 +52,7 @@ public class BodaBulkCMParser {
      * <p>
      * Since 1.3.0
      */
-    final static String VERSION = "2.2.5";
+    final static String VERSION = "2.2.6";
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BodaBulkCMParser.class);
@@ -740,9 +740,7 @@ public class BodaBulkCMParser {
             }
 
             //Get date time 
-            if (parameterFile != null) {
-                getDateTime(this.dataSource);
-            }
+            getDateTime(this.dataSource);
 
             //Parse file
             this.parseFile(this.dataSource);
@@ -772,9 +770,7 @@ public class BodaBulkCMParser {
                     }
 
                     //Get date time 
-                    if (parameterFile != null) {
-                        getDateTime(f.getAbsolutePath());
-                    }
+                    getDateTime(f.getAbsolutePath());
 
                     //Parse dump file 
                     this.parseFile(f.getAbsolutePath());
